@@ -38,7 +38,7 @@ type Waypoint struct {
 
 func (c Client) Waypoint(waypoint string) (Waypoint, error) {
 	var res Waypoint
-	if err := c.do("systems/{{.system}}/waypoints/{{.waypoint}}", &res, Do{TemplateData: map[string]string{
+	if err := c.do("systems/{{.system}}/waypoints/{{.waypoint}}", &res, Do{Template: map[string]string{
 		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"waypoint": waypoint,
 	}}); err != nil {
@@ -53,7 +53,7 @@ type Waypoints struct {
 
 func (c Client) WaypointsWithFilter(waypoint, filter string) ([]Waypoint, error) {
 	var waypoints Waypoints
-	if err := c.do("systems/{{.system}}/waypoints?{{.filter}}", &waypoints, Do{TemplateData: map[string]string{
+	if err := c.do("systems/{{.system}}/waypoints?{{.filter}}", &waypoints, Do{Template: map[string]string{
 		"system": strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"filter": filter,
 	}}); err != nil {
@@ -76,7 +76,7 @@ type WaypointShipyard struct {
 
 func (c Client) WaypointShipyard(waypoint string) (Shipyard, error) {
 	var waypointShipyard WaypointShipyard
-	if err := c.do("systems/{{.system}}/waypoints/{{.waypoint}}/shipyard", &waypointShipyard, Do{TemplateData: map[string]string{
+	if err := c.do("systems/{{.system}}/waypoints/{{.waypoint}}/shipyard", &waypointShipyard, Do{Template: map[string]string{
 		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"waypoint": waypoint,
 	}}); err != nil {
@@ -90,7 +90,7 @@ type WaypointMarket struct {
 
 func (c Client) WaypointMarket(waypoint string) (WaypointMarket, error) {
 	var waypointMarket WaypointMarket
-	if err := c.do("systems/{{.system}}/waypoints/{{.waypoint}}/market", &waypointMarket, Do{TemplateData: map[string]string{
+	if err := c.do("systems/{{.system}}/waypoints/{{.waypoint}}/market", &waypointMarket, Do{Template: map[string]string{
 		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"waypoint": waypoint,
 	}}); err != nil {
@@ -131,7 +131,7 @@ type Accept struct {
 
 func (c Client) Accept(id string) (Accept, error) {
 	var accept Accept
-	if err := c.do("my/contracts/{{.id}}/accept", &accept, Do{Method: "POST", TemplateData: map[string]string{
+	if err := c.do("my/contracts/{{.id}}/accept", &accept, Do{Method: "POST", Template: map[string]string{
 		"id": id,
 	}}); err != nil {
 		return Accept{}, err
@@ -189,7 +189,7 @@ type MyShipsOrbit struct {
 
 func (c Client) MyShipsOrbit(ship string) (ShipOrbit, error) {
 	var myShipsOrbit MyShipsOrbit
-	if err := c.do("my/ships/{{.ship}}/orbit", &myShipsOrbit, Do{Method: "POST", TemplateData: map[string]string{
+	if err := c.do("my/ships/{{.ship}}/orbit", &myShipsOrbit, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}, PayloadData: map[string]any{}}); err != nil {
 		return ShipOrbit{}, err
@@ -202,7 +202,7 @@ type MyShipsDock struct {
 
 func (c Client) MyShipsDock(ship string) (MyShipsDock, error) {
 	var myShipsDock MyShipsDock
-	if err := c.do("my/ships/{{.ship}}/dock", &myShipsDock, Do{Method: "POST", TemplateData: map[string]string{
+	if err := c.do("my/ships/{{.ship}}/dock", &myShipsDock, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}, PayloadData: map[string]any{}}); err != nil {
 		return MyShipsDock{}, err
@@ -215,7 +215,7 @@ type MyShipsRefuel struct {
 
 func (c Client) MyShipsRefuel(ship string) (MyShipsRefuel, error) {
 	var myShipsRefuel MyShipsRefuel
-	if err := c.do("my/ships/{{.ship}}/refuel", &myShipsRefuel, Do{Method: "POST", TemplateData: map[string]string{
+	if err := c.do("my/ships/{{.ship}}/refuel", &myShipsRefuel, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}, PayloadData: map[string]any{}}); err != nil {
 		return MyShipsRefuel{}, err
@@ -241,7 +241,7 @@ type MyShipsExtract struct {
 
 func (c Client) MyShipsExtract(ship string) (MyShipsExtract, error) {
 	var myShipsExtract MyShipsExtract
-	if err := c.do("my/ships/{{.ship}}/extract", &myShipsExtract, Do{Method: "POST", TemplateData: map[string]string{
+	if err := c.do("my/ships/{{.ship}}/extract", &myShipsExtract, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}, PayloadData: map[string]any{}}); err != nil {
 		return MyShipsExtract{}, err
@@ -266,7 +266,7 @@ type MyShipsCargo struct {
 
 func (c Client) MyShipsCargo(ship string) (Cargo, error) {
 	var myShipsCargo MyShipsCargo
-	if err := c.do("my/ships/{{.ship}}/cargo", &myShipsCargo, Do{TemplateData: map[string]string{
+	if err := c.do("my/ships/{{.ship}}/cargo", &myShipsCargo, Do{Template: map[string]string{
 		"ship": ship,
 	}, PayloadData: map[string]any{}}); err != nil {
 		return Cargo{}, err
@@ -279,7 +279,7 @@ type MyShipsNavigate struct {
 
 func (c Client) MyShipsNavigate(ship, symbol string) (MyShipsNavigate, error) {
 	var myShipsNavigate MyShipsNavigate
-	if err := c.do("my/ships/{{.ship}}/navigate", &myShipsNavigate, Do{Method: "POST", TemplateData: map[string]string{
+	if err := c.do("my/ships/{{.ship}}/navigate", &myShipsNavigate, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}, PayloadData: map[string]any{
 		"waypointSymbol": symbol,
@@ -294,7 +294,7 @@ type MyShipsSell struct {
 
 func (c Client) MyShipsSell(ship, symbol string, units int) (MyShipsSell, error) {
 	var myShipsSell MyShipsSell
-	if err := c.do("my/ships/{{.ship}}/sell", &myShipsSell, Do{Method: "POST", TemplateData: map[string]string{
+	if err := c.do("my/ships/{{.ship}}/sell", &myShipsSell, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}, PayloadData: map[string]any{
 		"symbol": symbol,
@@ -310,7 +310,7 @@ type MyShipsJettison struct {
 
 func (c Client) MyShipsJettison(ship, symbol string, units int) (MyShipsJettison, error) {
 	var myShipsJettison MyShipsJettison
-	if err := c.do("my/ships/{{.ship}}/jettison", &myShipsJettison, Do{Method: "POST", TemplateData: map[string]string{
+	if err := c.do("my/ships/{{.ship}}/jettison", &myShipsJettison, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}, PayloadData: map[string]any{
 		"symbol": symbol,
@@ -326,9 +326,9 @@ const (
 )
 
 type Do struct {
-	Method       string
-	TemplateData map[string]string
-	PayloadData  map[string]any
+	Method      string
+	Template    map[string]string
+	PayloadData map[string]any
 }
 
 func (c Client) do(pathTemplate string, value any, cfg Do) error {
@@ -337,7 +337,7 @@ func (c Client) do(pathTemplate string, value any, cfg Do) error {
 		return err
 	}
 	var builder strings.Builder
-	if err = parsedTemplate.Execute(&builder, cfg.TemplateData); err != nil {
+	if err = parsedTemplate.Execute(&builder, cfg.Template); err != nil {
 		return err
 	}
 	path := builder.String()

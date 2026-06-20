@@ -179,30 +179,12 @@ func (g Game) extract(ship string, contractTradeSymbols map[string]any) error {
 			}
 			fmt.Printf("%#v\n", orbit)
 		}
-		extract, err := g.myShipsAction(ship, "extract", "POST")
+		extract, err := g.myShipsExtract(ship)
 		if err != nil {
 			return err
 		}
-		if _, ok := extract["error"]; ok {
-			errorMap, err := getMapField(extract, "error")
-			if err != nil {
-				return err
-			}
-			data, err := getMapField(errorMap, "data")
-			if err != nil {
-				return err
-			}
-			cooldown, err := getMapField(data, "cooldown")
-			if err != nil {
-				return err
-			}
-			remainingSeconds, err := getIntField(cooldown, "remainingSeconds")
-			if err != nil {
-				return err
-			}
-			fmt.Printf("sleep %d\n", remainingSeconds)
-			time.Sleep(time.Duration(remainingSeconds) * time.Second)
-		}
+		fmt.Printf("sleep %d\n", extract.Error.Data.Cooldown.RemainingSeconds)
+		time.Sleep(time.Duration(extract.Error.Data.Cooldown.RemainingSeconds) * time.Second)
 	}
 	return nil
 }
@@ -482,6 +464,32 @@ func (g Game) myShipsRefuel(ship string) (MyShipsRefuel, error) {
 		return MyShipsRefuel{}, err
 	}
 	return myShipsRefuel, nil
+}
+
+type MyShipsExtractErrorCooldown struct {
+	RemainingSeconds int `json:"remainingSeconds"`
+}
+
+type MyShipsExtractErrorData struct {
+	Cooldown MyShipsExtractErrorCooldown `json:"cooldown"`
+}
+
+type MyShipsExtractError struct {
+	Data MyShipsExtractErrorData `json:"data"`
+}
+
+type MyShipsExtract struct {
+	Error MyShipsExtractError `json:"error"`
+}
+
+func (g Game) myShipsExtract(ship string) (MyShipsExtract, error) {
+	var myShipsExtract MyShipsExtract
+	if _, err := g.do("my/ships/{{.ship}}/extract", "POST", map[string]string{
+		"ship": ship,
+	}, map[string]any{}, &myShipsExtract); err != nil {
+		return MyShipsExtract{}, err
+	}
+	return myShipsExtract, nil
 }
 
 func (g Game) myShipsAction(ship, action, method string) (map[string]any, error) {

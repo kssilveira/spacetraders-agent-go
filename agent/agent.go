@@ -32,6 +32,10 @@ func (a Agent) All() error {
 		if err := a.navigateAndExtract(headquarters, ship, symbolToDeliver); err != nil {
 			return err
 		}
+		isDone, units, err = a.isDone(ship)
+		if err != nil {
+			return err
+		}
 	}
 	if err := a.deliver(contractID, ship, units, symbolToDeliver); err != nil {
 		return err
@@ -258,6 +262,12 @@ func (a Agent) deliver(contractID, ship string, units int, symbolToDeliver map[s
 			fmt.Printf("%#v\n", navigate)
 		}
 		dock, err := a.Client.MyShipsDock(ship)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("sleep %d\n", dock.Error.Data.SecondsToArrival)
+		time.Sleep(time.Duration(dock.Error.Data.SecondsToArrival) * time.Second)
+		dock, err = a.Client.MyShipsDock(ship)
 		if err != nil {
 			return err
 		}

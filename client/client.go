@@ -214,7 +214,16 @@ func (c Client) MyShipsOrbit(ship string) (ShipOrbit, error) {
 	return myShipsOrbit.Data, nil
 }
 
+type MyShipsDockErrorData struct {
+	SecondsToArrival int `json:"secondsToArrival"`
+}
+
+type MyShipsDockError struct {
+	Data MyShipsDockErrorData `json:"data"`
+}
+
 type MyShipsDock struct {
+	Error MyShipsDockError `json:"error"`
 }
 
 func (c Client) MyShipsDock(ship string) (MyShipsDock, error) {

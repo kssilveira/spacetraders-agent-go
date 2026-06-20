@@ -148,11 +148,11 @@ func (g Game) navigate(headquarters, ship string) error {
 		}
 		fmt.Printf("%#v\n", refuel)
 	}
-	market, err := g.waypointAction(orbit.Nav.WaypointSymbol, "market")
+	market, err := g.waypointMarket(orbit.Nav.WaypointSymbol)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%d\n", len(market))
+	fmt.Printf("%#v\n", market)
 	return nil
 }
 
@@ -344,6 +344,20 @@ func (g Game) waypointShipyard(waypoint string) (Shipyard, error) {
 		return Shipyard{}, err
 	}
 	return waypointShipyard.Data, nil
+}
+
+type WaypointMarket struct {
+}
+
+func (g Game) waypointMarket(waypoint string) (WaypointMarket, error) {
+	var waypointMarket WaypointMarket
+	if _, err := g.do("systems/{{.system}}/waypoints/{{.waypoint}}/market", "GET", map[string]string{
+		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
+		"waypoint": waypoint,
+	}, nil, &waypointMarket); err != nil {
+		return WaypointMarket{}, err
+	}
+	return waypointMarket, nil
 }
 
 func (g Game) waypointAction(waypoint, action string) (map[string]any, error) {

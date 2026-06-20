@@ -33,28 +33,8 @@ func (a Agent) All() error {
 			return err
 		}
 	}
-	for trade, deliver := range symbolToDeliver {
-		orbit, err := a.Client.MyShipsOrbit(ship)
-		if err != nil {
-			return err
-		}
-		if orbit.Nav.WaypointSymbol != deliver.DestinationSymbol {
-			navigate, err := a.Client.MyShipsNavigate(ship, deliver.DestinationSymbol)
-			if err != nil {
-				return err
-			}
-			fmt.Printf("%#v\n", navigate)
-		}
-		dock, err := a.Client.MyShipsDock(ship)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("%#v\n", dock)
-		deliver, err := a.Client.MyContractsDeliver(contractID, ship, trade, units)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("%#v\n", deliver)
+	if err := a.deliver(contractID, ship, units, symbolToDeliver); err != nil {
+		return err
 	}
 	return nil
 }
@@ -262,4 +242,31 @@ func (a Agent) isDone(ship string) (bool, int, error) {
 		return true, cargo.Units, nil
 	}
 	return false, 0, nil
+}
+
+func (a Agent) deliver(contractID, ship string, units int, symbolToDeliver map[string]client.Deliver) error {
+	for trade, deliver := range symbolToDeliver {
+		orbit, err := a.Client.MyShipsOrbit(ship)
+		if err != nil {
+			return err
+		}
+		if orbit.Nav.WaypointSymbol != deliver.DestinationSymbol {
+			navigate, err := a.Client.MyShipsNavigate(ship, deliver.DestinationSymbol)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("%#v\n", navigate)
+		}
+		dock, err := a.Client.MyShipsDock(ship)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%#v\n", dock)
+		deliver, err := a.Client.MyContractsDeliver(contractID, ship, trade, units)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%#v\n", deliver)
+	}
+	return nil
 }

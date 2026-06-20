@@ -115,11 +115,7 @@ func (g Game) doBuyShip(headquarters string) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			symbol, err := getStringField(got, "symbol")
-			if err != nil {
-				return "", err
-			}
-			return symbol, nil
+			return got.Symbol, nil
 		}
 	}
 	return "", fmt.Errorf("failed to buy ship")
@@ -427,11 +423,19 @@ func (g Game) myShips() ([]Ship, error) {
 	return myShips.Data, nil
 }
 
-func (g Game) myShipsBuy(waypoint, shipType string) (map[string]any, error) {
-	return g.do("my/ships", "POST", nil, map[string]any{
+type MyShipsBuy struct {
+	Data Ship `json:"data"`
+}
+
+func (g Game) myShipsBuy(waypoint, shipType string) (Ship, error) {
+	var myShipsBuy MyShipsBuy
+	if _, err := g.do("my/ships", "POST", nil, map[string]any{
 		"shipType":       shipType,
 		"waypointSymbol": waypoint,
-	}, nil)
+	}, &myShipsBuy); err != nil {
+		return Ship{}, nil
+	}
+	return myShipsBuy.Data, nil
 }
 
 func (g Game) myShipsAction(ship, action, method string) (map[string]any, error) {

@@ -48,7 +48,7 @@ func (g Game) getHeadquarters() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("%s\n", waypoint)
+	fmt.Printf("%#v\n", waypoint)
 	return headquarters, nil
 }
 
@@ -63,7 +63,7 @@ func (g Game) acceptContract() (map[string]any, error) {
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("%d\n", len(accepted))
+		fmt.Printf("%#v\n", accepted)
 	}
 	res := map[string]any{}
 	for _, deliver := range contract.Terms.Deliver {
@@ -412,10 +412,17 @@ func (g Game) myContracts() ([]Contract, error) {
 	return myContracts.Data, nil
 }
 
-func (g Game) accept(id string) (map[string]any, error) {
-	return g.do("my/contracts/{{.id}}/accept", "POST", map[string]string{
+type Accept struct {
+}
+
+func (g Game) accept(id string) (Accept, error) {
+	var accept Accept
+	if _, err := g.do("my/contracts/{{.id}}/accept", "POST", map[string]string{
 		"id": id,
-	}, nil, nil)
+	}, nil, &accept); err != nil {
+		return Accept{}, err
+	}
+	return accept, nil
 }
 
 func (g Game) myShips() ([]any, error) {

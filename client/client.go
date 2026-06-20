@@ -191,7 +191,7 @@ func (c Client) MyShipsOrbit(ship string) (ShipOrbit, error) {
 	var myShipsOrbit MyShipsOrbit
 	if err := c.do("my/ships/{{.ship}}/orbit", &myShipsOrbit, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
-	}, Payload: map[string]any{}}); err != nil {
+	}}); err != nil {
 		return ShipOrbit{}, err
 	}
 	return myShipsOrbit.Data, nil
@@ -204,7 +204,7 @@ func (c Client) MyShipsDock(ship string) (MyShipsDock, error) {
 	var myShipsDock MyShipsDock
 	if err := c.do("my/ships/{{.ship}}/dock", &myShipsDock, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
-	}, Payload: map[string]any{}}); err != nil {
+	}}); err != nil {
 		return MyShipsDock{}, err
 	}
 	return myShipsDock, nil
@@ -217,7 +217,7 @@ func (c Client) MyShipsRefuel(ship string) (MyShipsRefuel, error) {
 	var myShipsRefuel MyShipsRefuel
 	if err := c.do("my/ships/{{.ship}}/refuel", &myShipsRefuel, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
-	}, Payload: map[string]any{}}); err != nil {
+	}}); err != nil {
 		return MyShipsRefuel{}, err
 	}
 	return myShipsRefuel, nil
@@ -243,7 +243,7 @@ func (c Client) MyShipsExtract(ship string) (MyShipsExtract, error) {
 	var myShipsExtract MyShipsExtract
 	if err := c.do("my/ships/{{.ship}}/extract", &myShipsExtract, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
-	}, Payload: map[string]any{}}); err != nil {
+	}}); err != nil {
 		return MyShipsExtract{}, err
 	}
 	return myShipsExtract, nil
@@ -268,7 +268,7 @@ func (c Client) MyShipsCargo(ship string) (Cargo, error) {
 	var myShipsCargo MyShipsCargo
 	if err := c.do("my/ships/{{.ship}}/cargo", &myShipsCargo, Do{Template: map[string]string{
 		"ship": ship,
-	}, Payload: map[string]any{}}); err != nil {
+	}}); err != nil {
 		return Cargo{}, err
 	}
 	return myShipsCargo.Data, nil
@@ -342,6 +342,9 @@ func (c Client) do(pathTemplate string, value any, cfg Do) error {
 	}
 	path := builder.String()
 	url := fmt.Sprintf("%s/%s", baseUrl, path)
+	if cfg.Payload == nil {
+		cfg.Payload = map[string]any{}
+	}
 	payload, err := json.Marshal(cfg.Payload)
 	if err != nil {
 		return err

@@ -360,14 +360,6 @@ func (g Game) waypointMarket(waypoint string) (WaypointMarket, error) {
 	return waypointMarket, nil
 }
 
-func (g Game) waypointAction(waypoint, action string) (map[string]any, error) {
-	return g.do("systems/{{.system}}/waypoints/{{.waypoint}}/{{.action}}", "GET", map[string]string{
-		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
-		"waypoint": waypoint,
-		"action":   action,
-	}, nil, nil)
-}
-
 type Deliver struct {
 	TradeSymbol string `json:"tradeSymbol"`
 }

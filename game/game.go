@@ -489,13 +489,6 @@ func (g Game) myShipsCargo(ship string) (Cargo, error) {
 	return myShipsCargo.Data, nil
 }
 
-func (g Game) myShipsAction(ship, action, method string) (map[string]any, error) {
-	return g.do("my/ships/{{.ship}}/{{.action}}", method, map[string]string{
-		"ship":   ship,
-		"action": action,
-	}, map[string]any{}, nil)
-}
-
 type MyShipsNavigate struct {
 }
 

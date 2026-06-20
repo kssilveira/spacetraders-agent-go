@@ -200,11 +200,11 @@ func (g Game) sell(ship string, contractTradeSymbols map[string]any, isOrbit boo
 		}
 		if isOrbit {
 			isOrbit = false
-			dock, err := g.myShipsAction(ship, "dock", "POST")
+			dock, err := g.myShipsDock(ship)
 			if err != nil {
 				return false, err
 			}
-			fmt.Printf("%d\n", len(dock))
+			fmt.Printf("%#v\n", dock)
 		}
 		sell, err := g.myShipsSell(ship, item.Symbol, item.Units)
 		if err != nil {

@@ -166,7 +166,7 @@ type MyShipsBuy struct {
 
 func (c Client) MyShipsBuy(waypoint, shipType string) (Ship, error) {
 	var myShipsBuy MyShipsBuy
-	if err := c.do("my/ships", &myShipsBuy, Do{Method: "POST", PayloadData: map[string]any{
+	if err := c.do("my/ships", &myShipsBuy, Do{Method: "POST", Payload: map[string]any{
 		"shipType":       shipType,
 		"waypointSymbol": waypoint,
 	}}); err != nil {
@@ -191,7 +191,7 @@ func (c Client) MyShipsOrbit(ship string) (ShipOrbit, error) {
 	var myShipsOrbit MyShipsOrbit
 	if err := c.do("my/ships/{{.ship}}/orbit", &myShipsOrbit, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
-	}, PayloadData: map[string]any{}}); err != nil {
+	}, Payload: map[string]any{}}); err != nil {
 		return ShipOrbit{}, err
 	}
 	return myShipsOrbit.Data, nil
@@ -204,7 +204,7 @@ func (c Client) MyShipsDock(ship string) (MyShipsDock, error) {
 	var myShipsDock MyShipsDock
 	if err := c.do("my/ships/{{.ship}}/dock", &myShipsDock, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
-	}, PayloadData: map[string]any{}}); err != nil {
+	}, Payload: map[string]any{}}); err != nil {
 		return MyShipsDock{}, err
 	}
 	return myShipsDock, nil
@@ -217,7 +217,7 @@ func (c Client) MyShipsRefuel(ship string) (MyShipsRefuel, error) {
 	var myShipsRefuel MyShipsRefuel
 	if err := c.do("my/ships/{{.ship}}/refuel", &myShipsRefuel, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
-	}, PayloadData: map[string]any{}}); err != nil {
+	}, Payload: map[string]any{}}); err != nil {
 		return MyShipsRefuel{}, err
 	}
 	return myShipsRefuel, nil
@@ -243,7 +243,7 @@ func (c Client) MyShipsExtract(ship string) (MyShipsExtract, error) {
 	var myShipsExtract MyShipsExtract
 	if err := c.do("my/ships/{{.ship}}/extract", &myShipsExtract, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
-	}, PayloadData: map[string]any{}}); err != nil {
+	}, Payload: map[string]any{}}); err != nil {
 		return MyShipsExtract{}, err
 	}
 	return myShipsExtract, nil
@@ -268,7 +268,7 @@ func (c Client) MyShipsCargo(ship string) (Cargo, error) {
 	var myShipsCargo MyShipsCargo
 	if err := c.do("my/ships/{{.ship}}/cargo", &myShipsCargo, Do{Template: map[string]string{
 		"ship": ship,
-	}, PayloadData: map[string]any{}}); err != nil {
+	}, Payload: map[string]any{}}); err != nil {
 		return Cargo{}, err
 	}
 	return myShipsCargo.Data, nil
@@ -281,7 +281,7 @@ func (c Client) MyShipsNavigate(ship, symbol string) (MyShipsNavigate, error) {
 	var myShipsNavigate MyShipsNavigate
 	if err := c.do("my/ships/{{.ship}}/navigate", &myShipsNavigate, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
-	}, PayloadData: map[string]any{
+	}, Payload: map[string]any{
 		"waypointSymbol": symbol,
 	}}); err != nil {
 		return MyShipsNavigate{}, err
@@ -296,7 +296,7 @@ func (c Client) MyShipsSell(ship, symbol string, units int) (MyShipsSell, error)
 	var myShipsSell MyShipsSell
 	if err := c.do("my/ships/{{.ship}}/sell", &myShipsSell, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
-	}, PayloadData: map[string]any{
+	}, Payload: map[string]any{
 		"symbol": symbol,
 		"units":  units,
 	}}); err != nil {
@@ -312,7 +312,7 @@ func (c Client) MyShipsJettison(ship, symbol string, units int) (MyShipsJettison
 	var myShipsJettison MyShipsJettison
 	if err := c.do("my/ships/{{.ship}}/jettison", &myShipsJettison, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
-	}, PayloadData: map[string]any{
+	}, Payload: map[string]any{
 		"symbol": symbol,
 		"units":  units,
 	}}); err != nil {
@@ -326,9 +326,9 @@ const (
 )
 
 type Do struct {
-	Method      string
-	Template    map[string]string
-	PayloadData map[string]any
+	Method   string
+	Template map[string]string
+	Payload  map[string]any
 }
 
 func (c Client) do(pathTemplate string, value any, cfg Do) error {
@@ -342,7 +342,7 @@ func (c Client) do(pathTemplate string, value any, cfg Do) error {
 	}
 	path := builder.String()
 	url := fmt.Sprintf("%s/%s", baseUrl, path)
-	payload, err := json.Marshal(cfg.PayloadData)
+	payload, err := json.Marshal(cfg.Payload)
 	if err != nil {
 		return err
 	}

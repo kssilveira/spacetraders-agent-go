@@ -24,6 +24,11 @@ func (a Agent) All() error {
 	if err != nil {
 		return err
 	}
+	refuel, err := a.Client.MyShipsRefuel(ship)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%#v\n", refuel)
 	isDone, units, err := a.isDone(ship)
 	if err != nil {
 		return err

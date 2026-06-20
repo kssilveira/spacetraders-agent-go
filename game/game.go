@@ -88,27 +88,11 @@ func (g Game) excavator() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	for i := range ships {
-		ship, err := getMap(ships[i])
-		if err != nil {
-			return "", err
-		}
-		registration, err := getMapField(ship, "registration")
-		if err != nil {
-			return "", err
-		}
-		role, err := getStringField(registration, "role")
-		if err != nil {
-			return "", err
-		}
-		if role != "EXCAVATOR" {
+	for _, ship := range ships {
+		if ship.Registration.Role != "EXCAVATOR" {
 			continue
 		}
-		symbol, err := getStringField(ship, "symbol")
-		if err != nil {
-			return "", err
-		}
-		return symbol, nil
+		return ship.Symbol, nil
 	}
 	return "", nil
 }
@@ -425,12 +409,25 @@ func (g Game) accept(id string) (Accept, error) {
 	return accept, nil
 }
 
-func (g Game) myShips() ([]any, error) {
-	data, err := g.do("my/ships", "GET", nil, nil, nil)
-	if err != nil {
+type Registration struct {
+	Role string `json:"role"`
+}
+
+type Ship struct {
+	Symbol       string       `json:"symbol"`
+	Registration Registration `json:"registration"`
+}
+
+type MyShips struct {
+	Data []Ship `json:"data"`
+}
+
+func (g Game) myShips() ([]Ship, error) {
+	var myShips MyShips
+	if _, err := g.do("my/ships", "GET", nil, nil, &myShips); err != nil {
 		return nil, err
 	}
-	return getListField(data, "data")
+	return myShips.Data, nil
 }
 
 func (g Game) myShipsBuy(waypoint, shipType string) (map[string]any, error) {

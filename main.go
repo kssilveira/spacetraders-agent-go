@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/kssilveira/spacetraders-agent-go/game"
+	"github.com/kssilveira/spacetraders-agent-go/agent"
 )
 
 func main() {
@@ -21,8 +21,8 @@ func all() error {
 	if err != nil {
 		return err
 	}
-	game := game.Game{Token: token, Client: &http.Client{}}
-	return game.All()
+	agent := agent.Agent{Token: token, Client: &http.Client{}}
+	return agent.All()
 }
 
 func getToken() (string, error) {

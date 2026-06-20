@@ -20,15 +20,21 @@ func (a Agent) All() error {
 	if err != nil {
 		return err
 	}
-	ship, err := a.buyShip(headquarters)
+	ship, err := a.maybeBuyShip(headquarters)
 	if err != nil {
 		return err
 	}
-	if err := a.navigate(headquarters, ship); err != nil {
+	isDone, err := a.isDone(ship)
+	if err != nil {
 		return err
 	}
-	if err := a.extract(ship, contractTradeSymbols); err != nil {
-		return err
+	if !isDone {
+		if err := a.navigate(headquarters, ship); err != nil {
+			return err
+		}
+		if err := a.extract(ship, contractTradeSymbols); err != nil {
+			return err
+		}
 	}
 	for trade, destination := range contractTradeSymbols {
 		orbit, err := a.Client.MyShipsOrbit(ship)
@@ -82,7 +88,7 @@ func (a Agent) acceptContract() (map[string]string, error) {
 	return res, nil
 }
 
-func (a Agent) buyShip(headquarters string) (string, error) {
+func (a Agent) maybeBuyShip(headquarters string) (string, error) {
 	symbol, err := a.excavator()
 	if err != nil {
 		return "", err

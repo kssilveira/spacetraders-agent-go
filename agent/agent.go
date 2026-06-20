@@ -16,7 +16,7 @@ func (a Agent) All() error {
 	if err != nil {
 		return err
 	}
-	contractID, contractTradeSymbols, err := a.acceptContract()
+	contractID, symbolToDeliver, err := a.acceptContract()
 	if err != nil {
 		return err
 	}
@@ -32,17 +32,17 @@ func (a Agent) All() error {
 		if err := a.navigate(headquarters, ship); err != nil {
 			return err
 		}
-		if err := a.extract(ship, contractTradeSymbols); err != nil {
+		if err := a.extract(ship, symbolToDeliver); err != nil {
 			return err
 		}
 	}
-	for trade, destination := range contractTradeSymbols {
+	for trade, deliver := range symbolToDeliver {
 		orbit, err := a.Client.MyShipsOrbit(ship)
 		if err != nil {
 			return err
 		}
-		if orbit.Nav.WaypointSymbol != destination {
-			navigate, err := a.Client.MyShipsNavigate(ship, destination)
+		if orbit.Nav.WaypointSymbol != deliver.DestinationSymbol {
+			navigate, err := a.Client.MyShipsNavigate(ship, deliver.DestinationSymbol)
 			if err != nil {
 				return err
 			}
@@ -76,7 +76,7 @@ func (a Agent) getHeadquarters() (string, error) {
 	return headquarters, nil
 }
 
-func (a Agent) acceptContract() (string, map[string]string, error) {
+func (a Agent) acceptContract() (string, map[string]client.Deliver, error) {
 	contracts, err := a.Client.MyContracts()
 	if err != nil {
 		return "", nil, err
@@ -89,9 +89,9 @@ func (a Agent) acceptContract() (string, map[string]string, error) {
 		}
 		fmt.Printf("%#v\n", accepted)
 	}
-	res := map[string]string{}
+	res := map[string]client.Deliver{}
 	for _, deliver := range contract.Terms.Deliver {
-		res[deliver.TradeSymbol] = deliver.DestinationSymbol
+		res[deliver.TradeSymbol] = deliver
 	}
 	return contract.ID, res, nil
 }
@@ -180,11 +180,11 @@ func (a Agent) navigate(headquarters, ship string) error {
 	return nil
 }
 
-func (a Agent) extract(ship string, contractTradeSymbols map[string]string) error {
+func (a Agent) extract(ship string, symbolToDeliver map[string]client.Deliver) error {
 	isOrbit := false
 	var err error
 	for {
-		isOrbit, err = a.sell(ship, contractTradeSymbols, isOrbit)
+		isOrbit, err = a.sell(ship, symbolToDeliver, isOrbit)
 		if err != nil {
 			return err
 		}
@@ -213,13 +213,13 @@ func (a Agent) extract(ship string, contractTradeSymbols map[string]string) erro
 	return nil
 }
 
-func (a Agent) sell(ship string, contractTradeSymbols map[string]string, isOrbit bool) (bool, error) {
+func (a Agent) sell(ship string, symbolToDeliver map[string]client.Deliver, isOrbit bool) (bool, error) {
 	cargo, err := a.Client.MyShipsCargo(ship)
 	if err != nil {
 		return false, err
 	}
 	for _, item := range cargo.Inventory {
-		if _, ok := contractTradeSymbols[item.Symbol]; ok {
+		if _, ok := symbolToDeliver[item.Symbol]; ok {
 			continue
 		}
 		if isOrbit {

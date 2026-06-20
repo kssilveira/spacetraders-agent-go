@@ -338,10 +338,6 @@ func (c Client) MyShipsJettison(ship, symbol string, units int) (MyShipsJettison
 	return myShipsJettison, nil
 }
 
-const (
-	baseUrl = "https://api.spacetraders.io/v2"
-)
-
 type Do struct {
 	Method   string
 	Template map[string]string
@@ -349,16 +345,10 @@ type Do struct {
 }
 
 func (c Client) do(pathTemplate string, value any, cfg Do) error {
-	parsedTemplate, err := template.New("pathTemplate").Parse(pathTemplate)
+	url, err := getURL(pathTemplate, cfg)
 	if err != nil {
 		return err
 	}
-	var builder strings.Builder
-	if err = parsedTemplate.Execute(&builder, cfg.Template); err != nil {
-		return err
-	}
-	path := builder.String()
-	url := fmt.Sprintf("%s/%s", baseUrl, path)
 	if cfg.Payload == nil {
 		cfg.Payload = map[string]any{}
 	}
@@ -390,8 +380,24 @@ func (c Client) do(pathTemplate string, value any, cfg Do) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf(" => %d %s\n", resp.StatusCode, path)
+	fmt.Printf(" => %d %s\n", resp.StatusCode, url)
 	fmt.Println(prettyJSON.String())
-	fmt.Printf(" => %d %s\n", resp.StatusCode, path)
+	fmt.Printf(" => %d %s\n", resp.StatusCode, url)
 	return json.Unmarshal(body, value)
+}
+
+const (
+	baseUrl = "https://api.spacetraders.io/v2"
+)
+
+func getURL(pathTemplate string, cfg Do) (string, error) {
+	parsedTemplate, err := template.New("pathTemplate").Parse(pathTemplate)
+	if err != nil {
+		return "", err
+	}
+	var builder strings.Builder
+	if err = parsedTemplate.Execute(&builder, cfg.Template); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s/%s", baseUrl, builder.String()), nil
 }

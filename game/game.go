@@ -103,28 +103,12 @@ func (g Game) doBuyShip(headquarters string) (string, error) {
 		return "", err
 	}
 	for _, shipyardWaypoint := range shipyardWaypoints {
-		shipyard, err := g.waypointAction(shipyardWaypoint.Symbol, "shipyard")
+		shipyard, err := g.waypointShipyard(shipyardWaypoint.Symbol)
 		if err != nil {
 			return "", err
 		}
-		if _, ok := shipyard["ships"]; !ok {
-			continue
-		}
-		ships, err := getListField(shipyard, "ships")
-		if err != nil {
-			return "", err
-		}
-		for i := range ships {
-			ship, err := getMap(ships[i])
-			if err != nil {
-				return "", err
-			}
-			shipType, err := getStringField(ship, "type")
-			if err != nil {
-				return "", err
-			}
-			fmt.Printf("shipType %s\n", shipType)
-			if shipType != "SHIP_MINING_DRONE" {
+		for _, ship := range shipyard.Ships {
+			if ship.Type != "SHIP_MINING_DRONE" {
 				continue
 			}
 			got, err := g.myShipsBuy(shipyardWaypoint.Symbol, "SHIP_MINING_DRONE")
@@ -349,6 +333,29 @@ func (g Game) waypointsWithFilter(waypoint, filter string) ([]Waypoint, error) {
 		return nil, err
 	}
 	return waypoints.Data, nil
+}
+
+type ShipyardShip struct {
+	Type string `json:"type"`
+}
+
+type Shipyard struct {
+	Ships []ShipyardShip `json:"ships"`
+}
+
+type WaypointShipyard struct {
+	Data Shipyard `json:"data"`
+}
+
+func (g Game) waypointShipyard(waypoint string) (Shipyard, error) {
+	var waypointShipyard WaypointShipyard
+	if _, err := g.do("systems/{{.system}}/waypoints/{{.waypoint}}/shipyard", "GET", map[string]string{
+		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
+		"waypoint": waypoint,
+	}, nil, &waypointShipyard); err != nil {
+		return Shipyard{}, err
+	}
+	return waypointShipyard.Data, nil
 }
 
 func (g Game) waypointAction(waypoint, action string) (map[string]any, error) {

@@ -43,10 +43,7 @@ func (g Game) getHeadquarters() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	headquarters, err := getStringField(agent, "headquarters")
-	if err != nil {
-		return "", err
-	}
+	headquarters := agent.Headquarters
 	waypoint, err := g.waypoint(headquarters)
 	if err != nil {
 		return "", err
@@ -366,22 +363,34 @@ func (g Game) isDone(ship string) (bool, error) {
 	return false, nil
 }
 
-func (g Game) myAgent() (map[string]any, error) {
-	return g.do("my/agent", "GET", nil, nil)
+type Agent struct {
+	Headquarters string `json:"headquarters"`
+}
+
+type MyAgent struct {
+	Data Agent `json:"data"`
+}
+
+func (g Game) myAgent() (Agent, error) {
+	var myAgent MyAgent
+	if _, err := g.do("my/agent", "GET", nil, nil, &myAgent); err != nil {
+		return Agent{}, err
+	}
+	return myAgent.Data, nil
 }
 
 func (g Game) waypoint(waypoint string) (map[string]any, error) {
 	return g.do("systems/{{.system}}/waypoints/{{.waypoint}}", "GET", map[string]string{
 		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"waypoint": waypoint,
-	}, nil)
+	}, nil, nil)
 }
 
 func (g Game) waypointsWithFilter(waypoint, filter string) ([]any, error) {
 	data, err := g.do("systems/{{.system}}/waypoints?{{.filter}}", "GET", map[string]string{
 		"system": strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"filter": filter,
-	}, nil)
+	}, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -393,11 +402,11 @@ func (g Game) waypointAction(waypoint, action string) (map[string]any, error) {
 		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"waypoint": waypoint,
 		"action":   action,
-	}, nil)
+	}, nil, nil)
 }
 
 func (g Game) myContracts() ([]any, error) {
-	data, err := g.do("my/contracts", "GET", nil, nil)
+	data, err := g.do("my/contracts", "GET", nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -407,11 +416,11 @@ func (g Game) myContracts() ([]any, error) {
 func (g Game) accept(id string) (map[string]any, error) {
 	return g.do("my/contracts/{{.id}}/accept", "POST", map[string]string{
 		"id": id,
-	}, nil)
+	}, nil, nil)
 }
 
 func (g Game) myShips() ([]any, error) {
-	data, err := g.do("my/ships", "GET", nil, nil)
+	data, err := g.do("my/ships", "GET", nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -422,14 +431,14 @@ func (g Game) myShipsBuy(waypoint, shipType string) (map[string]any, error) {
 	return g.do("my/ships", "POST", nil, map[string]any{
 		"shipType":       shipType,
 		"waypointSymbol": waypoint,
-	})
+	}, nil)
 }
 
 func (g Game) myShipsAction(ship, action, method string) (map[string]any, error) {
 	return g.do("my/ships/{{.ship}}/{{.action}}", method, map[string]string{
 		"ship":   ship,
 		"action": action,
-	}, map[string]any{})
+	}, map[string]any{}, nil)
 }
 
 func (g Game) myShipsNavigate(ship, symbol string) (map[string]any, error) {
@@ -437,7 +446,7 @@ func (g Game) myShipsNavigate(ship, symbol string) (map[string]any, error) {
 		"ship": ship,
 	}, map[string]any{
 		"waypointSymbol": symbol,
-	})
+	}, nil)
 }
 
 func (g Game) myShipsSell(ship, symbol string, units int) (map[string]any, error) {
@@ -446,7 +455,7 @@ func (g Game) myShipsSell(ship, symbol string, units int) (map[string]any, error
 	}, map[string]any{
 		"symbol": symbol,
 		"units":  units,
-	})
+	}, nil)
 }
 
 func (g Game) myShipsJettison(ship, symbol string, units int) (map[string]any, error) {
@@ -455,14 +464,14 @@ func (g Game) myShipsJettison(ship, symbol string, units int) (map[string]any, e
 	}, map[string]any{
 		"symbol": symbol,
 		"units":  units,
-	})
+	}, nil)
 }
 
 const (
 	baseUrl = "https://api.spacetraders.io/v2"
 )
 
-func (g Game) do(pathTemplate, method string, templateData map[string]string, payloadData map[string]any) (map[string]any, error) {
+func (g Game) do(pathTemplate, method string, templateData map[string]string, payloadData map[string]any, v any) (map[string]any, error) {
 	parsedTemplate, err := template.New("pathTemplate").Parse(pathTemplate)
 	if err != nil {
 		return nil, err
@@ -508,6 +517,11 @@ func (g Game) do(pathTemplate, method string, templateData map[string]string, pa
 	data, err := getMapField(res, "data")
 	if err != nil {
 		return res, nil
+	}
+	if v != nil {
+		if err := json.Unmarshal(body, v); err != nil {
+			return nil, err
+		}
 	}
 	return data, nil
 }

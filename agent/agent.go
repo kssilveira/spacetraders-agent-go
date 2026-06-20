@@ -46,13 +46,18 @@ func (a Agent) All() error {
 			if err != nil {
 				return err
 			}
-			// deliver, err := a.Client.myContractsDeliver(contract.ID, ship, trade, units)
 			fmt.Printf("%#v\n", navigate)
-			fmt.Printf("%#v\n", contractID)
-			fmt.Printf("%#v\n", trade)
-			fmt.Printf("%#v\n", units)
 		}
-		break
+		dock, err := a.Client.MyShipsDock(ship)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%#v\n", dock)
+		deliver, err := a.Client.MyContractsDeliver(contractID, ship, trade, units)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%#v\n", deliver)
 	}
 	return nil
 }

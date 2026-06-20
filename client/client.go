@@ -120,11 +120,27 @@ type MyContracts struct {
 
 func (c Client) MyContracts() ([]Contract, error) {
 	var myContracts MyContracts
-	fmt.Printf("%#v\n", myContracts)
 	if err := c.do("my/contracts", &myContracts, Do{}); err != nil {
 		return nil, err
 	}
 	return myContracts.Data, nil
+}
+
+type MyContractsDeliver struct {
+}
+
+func (c Client) MyContractsDeliver(ID, ship, trade string, units int) (MyContractsDeliver, error) {
+	var myContractsDeliver MyContractsDeliver
+	if err := c.do("my/contracts/{{.id}}/deliver", &myContractsDeliver, Do{Method: "POST", Template: map[string]string{
+		"id": ID,
+	}, Payload: map[string]any{
+		"shipSymbol":  ship,
+		"tradeSymbol": trade,
+		"units":       units,
+	}}); err != nil {
+		return MyContractsDeliver{}, err
+	}
+	return myContractsDeliver, nil
 }
 
 type Accept struct {

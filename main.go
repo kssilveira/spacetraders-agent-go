@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/kssilveira/spacetraders-agent-go/agent"
+	"github.com/kssilveira/spacetraders-agent-go/client"
 )
 
 func main() {
@@ -21,7 +22,7 @@ func all() error {
 	if err != nil {
 		return err
 	}
-	agent := agent.Agent{Token: token, Client: &http.Client{}}
+	agent := agent.Agent{Client: client.Client{Token: token, Client: &http.Client{}}}
 	return agent.All()
 }
 

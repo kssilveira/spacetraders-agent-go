@@ -9,11 +9,12 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/kssilveira/spacetraders-agent-go/client"
 )
 
 type Agent struct {
-	Token  string
-	Client *http.Client
+	Client client.Client
 }
 
 func (a Agent) All() error {
@@ -559,9 +560,9 @@ func (a Agent) do(pathTemplate, method string, templateData map[string]string, p
 	if err != nil {
 		return err
 	}
-	req.Header.Add("Authorization", "Bearer "+a.Token)
+	req.Header.Add("Authorization", "Bearer "+a.Client.Token)
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := a.Client.Do(req)
+	resp, err := a.Client.Client.Do(req)
 	if err != nil {
 		return err
 	}

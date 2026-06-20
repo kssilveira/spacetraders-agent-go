@@ -6,20 +6,6 @@ https://spacetraders.io agent in Go using https://spacetraders.io/openapi.
 
 ```
 curl --request POST \
- --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/survey'
-```
-
-```
-curl --request POST \
- --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/extract' \
- --header 'Content-Type: application/json' \
- --data '{
-    "survey": "null"
-   }'
-```
-
-```
-curl --request POST \
  --url 'https://api.spacetraders.io/v2/my/contracts/:contractId/fulfill'
 ```
 
@@ -52,4 +38,3 @@ curl --request POST \
     "faction": ""
    }'
 ```
-

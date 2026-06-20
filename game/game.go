@@ -221,23 +221,11 @@ func (g Game) sell(ship string, contractTradeSymbols map[string]any, isOrbit boo
 }
 
 func (g Game) isDone(ship string) (bool, error) {
-	cargo, err := g.myShipsAction(ship, "cargo", "GET")
+	cargo, err := g.myShipsCargo(ship)
 	if err != nil {
 		return false, err
 	}
-	inventory, err := getListField(cargo, "inventory")
-	if err != nil {
-		return false, err
-	}
-	capacity, err := getIntField(cargo, "capacity")
-	if err != nil {
-		return false, err
-	}
-	units, err := getIntField(cargo, "units")
-	if err != nil {
-		return false, err
-	}
-	if units == capacity && len(inventory) == 1 {
+	if cargo.Units == cargo.Capacity && len(cargo.Inventory) == 1 {
 		return true, nil
 	}
 	return false, nil

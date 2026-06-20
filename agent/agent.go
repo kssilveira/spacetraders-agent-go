@@ -164,17 +164,15 @@ func (a Agent) navigateAndExtract(headquarters, ship string, symbolToDeliver map
 			return err
 		}
 		fmt.Printf("%#v\n", navigate)
-		dock, err := a.Client.MyShipsDock(ship)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("%#v\n", dock)
-		refuel, err := a.Client.MyShipsRefuel(ship)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("%#v\n", refuel)
 	}
+	if err := a.dock(ship); err != nil {
+		return err
+	}
+	refuel, err := a.Client.MyShipsRefuel(ship)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%#v\n", refuel)
 	market, err := a.Client.WaypointMarket(orbit.Nav.WaypointSymbol)
 	if err != nil {
 		return err
@@ -274,22 +272,29 @@ func (a Agent) deliver(contractID, ship string, units int, symbolToDeliver map[s
 			}
 			fmt.Printf("%#v\n", navigate)
 		}
-		dock, err := a.Client.MyShipsDock(ship)
-		if err != nil {
+		if err := a.dock(ship); err != nil {
 			return err
 		}
-		fmt.Printf("sleep %d\n", dock.Error.Data.SecondsToArrival)
-		time.Sleep(time.Duration(dock.Error.Data.SecondsToArrival) * time.Second)
-		dock, err = a.Client.MyShipsDock(ship)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("%#v\n", dock)
 		deliver, err := a.Client.MyContractsDeliver(contractID, ship, trade, units)
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%#v\n", deliver)
 	}
+	return nil
+}
+
+func (a Agent) dock(ship string) error {
+	dock, err := a.Client.MyShipsDock(ship)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("sleep %d\n", dock.Error.Data.SecondsToArrival)
+	time.Sleep(time.Duration(dock.Error.Data.SecondsToArrival) * time.Second)
+	dock, err = a.Client.MyShipsDock(ship)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%#v\n", dock)
 	return nil
 }

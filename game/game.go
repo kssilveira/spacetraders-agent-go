@@ -48,7 +48,7 @@ func (g Game) getHeadquarters() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("%d\n", len(waypoint))
+	fmt.Printf("%s\n", waypoint)
 	return headquarters, nil
 }
 
@@ -379,11 +379,18 @@ func (g Game) myAgent() (Agent, error) {
 	return myAgent.Data, nil
 }
 
-func (g Game) waypoint(waypoint string) (map[string]any, error) {
-	return g.do("systems/{{.system}}/waypoints/{{.waypoint}}", "GET", map[string]string{
+type Waypoint struct {
+}
+
+func (g Game) waypoint(waypoint string) (Waypoint, error) {
+	var res Waypoint
+	if _, err := g.do("systems/{{.system}}/waypoints/{{.waypoint}}", "GET", map[string]string{
 		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"waypoint": waypoint,
-	}, nil, nil)
+	}, nil, &res); err != nil {
+		return Waypoint{}, err
+	}
+	return res, nil
 }
 
 func (g Game) waypointsWithFilter(waypoint, filter string) ([]any, error) {

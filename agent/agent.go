@@ -30,6 +30,21 @@ func (a Agent) All() error {
 	if err := a.extract(ship, contractTradeSymbols); err != nil {
 		return err
 	}
+	for trade, destination := range contractTradeSymbols {
+		orbit, err := a.Client.MyShipsOrbit(ship)
+		if err != nil {
+			return err
+		}
+		if orbit.Nav.WaypointSymbol != destination {
+			navigate, err := a.Client.MyShipsNavigate(ship, destination)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("%#v\n", navigate)
+			fmt.Printf("%#v\n", trade)
+		}
+		break
+	}
 	return nil
 }
 

@@ -47,7 +47,7 @@ func (a Agent) getHeadquarters() (string, error) {
 	return headquarters, nil
 }
 
-func (a Agent) acceptContract() (map[string]any, error) {
+func (a Agent) acceptContract() (map[string]string, error) {
 	contracts, err := a.Client.MyContracts()
 	if err != nil {
 		return nil, err
@@ -60,9 +60,9 @@ func (a Agent) acceptContract() (map[string]any, error) {
 		}
 		fmt.Printf("%#v\n", accepted)
 	}
-	res := map[string]any{}
+	res := map[string]string{}
 	for _, deliver := range contract.Terms.Deliver {
-		res[deliver.TradeSymbol] = nil
+		res[deliver.TradeSymbol] = deliver.DestinationSymbol
 	}
 	return res, nil
 }
@@ -151,7 +151,7 @@ func (a Agent) navigate(headquarters, ship string) error {
 	return nil
 }
 
-func (a Agent) extract(ship string, contractTradeSymbols map[string]any) error {
+func (a Agent) extract(ship string, contractTradeSymbols map[string]string) error {
 	isOrbit := false
 	var err error
 	for {
@@ -184,7 +184,7 @@ func (a Agent) extract(ship string, contractTradeSymbols map[string]any) error {
 	return nil
 }
 
-func (a Agent) sell(ship string, contractTradeSymbols map[string]any, isOrbit bool) (bool, error) {
+func (a Agent) sell(ship string, contractTradeSymbols map[string]string, isOrbit bool) (bool, error) {
 	cargo, err := a.Client.MyShipsCargo(ship)
 	if err != nil {
 		return false, err

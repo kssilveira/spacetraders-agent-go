@@ -57,44 +57,17 @@ func (g Game) acceptContract() (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	contract, err := getMap(contracts[0])
-	if err != nil {
-		return nil, err
-	}
-	isAccepted, err := getBoolField(contract, "accepted")
-	if err != nil {
-		return nil, err
-	}
-	if !isAccepted {
-		id, err := getStringField(contract, "id")
-		if err != nil {
-			return nil, err
-		}
-		accepted, err := g.accept(id)
+	contract := contracts[0]
+	if !contract.Accepted {
+		accepted, err := g.accept(contract.ID)
 		if err != nil {
 			return nil, err
 		}
 		fmt.Printf("%d\n", len(accepted))
 	}
-	terms, err := getMapField(contract, "terms")
-	if err != nil {
-		return nil, err
-	}
-	delivers, err := getListField(terms, "deliver")
-	if err != nil {
-		return nil, err
-	}
 	res := map[string]any{}
-	for i := range delivers {
-		deliver, err := getMap(delivers[i])
-		if err != nil {
-			return nil, err
-		}
-		tradeSymbol, err := getStringField(deliver, "tradeSymbol")
-		if err != nil {
-			return nil, err
-		}
-		res[tradeSymbol] = nil
+	for _, deliver := range contract.Terms.Deliver {
+		res[deliver.TradeSymbol] = nil
 	}
 	return res, nil
 }
@@ -412,12 +385,31 @@ func (g Game) waypointAction(waypoint, action string) (map[string]any, error) {
 	}, nil, nil)
 }
 
-func (g Game) myContracts() ([]any, error) {
-	data, err := g.do("my/contracts", "GET", nil, nil, nil)
-	if err != nil {
+type Deliver struct {
+	TradeSymbol string `json:"tradeSymbol"`
+}
+
+type Terms struct {
+	Deliver []Deliver `json:"deliver"`
+}
+
+type Contract struct {
+	ID       string `json:"id"`
+	Accepted bool   `json:"accepted"`
+	Terms    Terms  `json:"terms"`
+}
+
+type MyContracts struct {
+	Data []Contract `json:"data"`
+}
+
+func (g Game) myContracts() ([]Contract, error) {
+	var myContracts MyContracts
+	fmt.Printf("%#v\n", myContracts)
+	if _, err := g.do("my/contracts", "GET", nil, nil, &myContracts); err != nil {
 		return nil, err
 	}
-	return getListField(data, "data")
+	return myContracts.Data, nil
 }
 
 func (g Game) accept(id string) (map[string]any, error) {
@@ -521,14 +513,14 @@ func (g Game) do(pathTemplate, method string, templateData map[string]string, pa
 	if err := json.Unmarshal(body, &res); err != nil {
 		return nil, err
 	}
-	data, err := getMapField(res, "data")
-	if err != nil {
-		return res, nil
-	}
 	if v != nil {
 		if err := json.Unmarshal(body, v); err != nil {
 			return nil, err
 		}
+	}
+	data, err := getMapField(res, "data")
+	if err != nil {
+		return res, nil
 	}
 	return data, nil
 }

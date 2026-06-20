@@ -4,4 +4,4 @@ https://spacetraders.io/ agent in Go
 
 ## TODO
 
-- move api logic to client
+- change Client.do

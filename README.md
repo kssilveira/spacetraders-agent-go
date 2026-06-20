@@ -6,13 +6,21 @@ https://spacetraders.io agent in Go.
 
 ```
 curl --request POST \
- --url 'https://api.spacetraders.io/v2/register' \
- --header 'Authorization: Bearer ACCOUNT_TOKEN' \
+ --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/survey'
+```
+
+```
+curl --request POST \
+ --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/extract' \
  --header 'Content-Type: application/json' \
  --data '{
-    "symbol": "INSERT_CALLSIGN_HERE",
-    "faction": "COSMIC"
+    "survey": "null"
    }'
+```
+
+```
+curl --request POST \
+ --url 'https://api.spacetraders.io/v2/my/contracts/:contractId/fulfill'
 ```
 
 ```
@@ -23,7 +31,13 @@ curl --request POST \
 
 ```
 curl --request POST \
- --url 'https://api.spacetraders.io/v2/my/contracts/:contractId/fulfill'
+ --url 'https://api.spacetraders.io/v2/register' \
+ --header 'Authorization: Bearer ACCOUNT_TOKEN' \
+ --header 'Content-Type: application/json' \
+ --data '{
+    "symbol": "",
+    "faction": ""
+   }'
 ```
 
 ```
@@ -39,4 +53,76 @@ curl --request  \
 ```
 curl --request  \
  --url 'https://api.spacetraders.io/v2/systems/X1-KY89/waypoints'
+```
+
+```
+curl --request PATCH \
+ --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/nav' \
+ --header 'Content-Type: application/json' \
+ --data '{
+    "flightMode": ""
+   }'
+```
+
+```
+curl --request POST \
+ --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/warp' \
+ --header 'Content-Type: application/json' \
+ --data '{
+    "systemSymbol": ""
+   }'
+```
+
+```
+curl --request POST \
+ --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/jump' \
+ --header 'Content-Type: application/json' \
+ --data '{
+    "systemSymbol": ""
+   }'
+```
+
+```
+curl --request POST \
+ --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/refuel' \
+ --header 'Content-Type: application/json' \
+ --data '{
+    "fromCargo": ""
+   }'
+```
+
+```
+curl --request POST \
+ --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/siphon'
+```
+
+```
+curl --request POST \
+ --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/repair'
+```
+
+```
+curl 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/repair'
+```
+
+```
+curl --request POST \
+ --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/scrap'
+```
+
+```
+curl 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/scrap'
+```
+
+```
+openapi-generator generate \
+ -i https://spacetraders.io/SpaceTraders.json \
+ -o packages/spacetraders-sdk \
+ -g typescript-axios \
+ --additional-properties=npmName="spacetraders-sdk" \
+ --additional-properties=npmVersion="2.3.0" \
+ --additional-properties=supportsES6=true \
+ --additional-properties=withSeparateModelsAndApi=true \
+ --additional-properties=modelPackage="models" \
+ --additional-properties=apiPackage="api"
 ```

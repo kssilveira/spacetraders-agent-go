@@ -241,7 +241,7 @@ type MyAgent struct {
 
 func (g Game) myAgent() (Agent, error) {
 	var myAgent MyAgent
-	if _, err := g.do("my/agent", "GET", nil, nil, &myAgent); err != nil {
+	if err := g.do("my/agent", "GET", nil, nil, &myAgent); err != nil {
 		return Agent{}, err
 	}
 	return myAgent.Data, nil
@@ -253,7 +253,7 @@ type Waypoint struct {
 
 func (g Game) waypoint(waypoint string) (Waypoint, error) {
 	var res Waypoint
-	if _, err := g.do("systems/{{.system}}/waypoints/{{.waypoint}}", "GET", map[string]string{
+	if err := g.do("systems/{{.system}}/waypoints/{{.waypoint}}", "GET", map[string]string{
 		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"waypoint": waypoint,
 	}, nil, &res); err != nil {
@@ -268,7 +268,7 @@ type Waypoints struct {
 
 func (g Game) waypointsWithFilter(waypoint, filter string) ([]Waypoint, error) {
 	var waypoints Waypoints
-	if _, err := g.do("systems/{{.system}}/waypoints?{{.filter}}", "GET", map[string]string{
+	if err := g.do("systems/{{.system}}/waypoints?{{.filter}}", "GET", map[string]string{
 		"system": strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"filter": filter,
 	}, nil, &waypoints); err != nil {
@@ -291,7 +291,7 @@ type WaypointShipyard struct {
 
 func (g Game) waypointShipyard(waypoint string) (Shipyard, error) {
 	var waypointShipyard WaypointShipyard
-	if _, err := g.do("systems/{{.system}}/waypoints/{{.waypoint}}/shipyard", "GET", map[string]string{
+	if err := g.do("systems/{{.system}}/waypoints/{{.waypoint}}/shipyard", "GET", map[string]string{
 		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"waypoint": waypoint,
 	}, nil, &waypointShipyard); err != nil {
@@ -305,7 +305,7 @@ type WaypointMarket struct {
 
 func (g Game) waypointMarket(waypoint string) (WaypointMarket, error) {
 	var waypointMarket WaypointMarket
-	if _, err := g.do("systems/{{.system}}/waypoints/{{.waypoint}}/market", "GET", map[string]string{
+	if err := g.do("systems/{{.system}}/waypoints/{{.waypoint}}/market", "GET", map[string]string{
 		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"waypoint": waypoint,
 	}, nil, &waypointMarket); err != nil {
@@ -335,7 +335,7 @@ type MyContracts struct {
 func (g Game) myContracts() ([]Contract, error) {
 	var myContracts MyContracts
 	fmt.Printf("%#v\n", myContracts)
-	if _, err := g.do("my/contracts", "GET", nil, nil, &myContracts); err != nil {
+	if err := g.do("my/contracts", "GET", nil, nil, &myContracts); err != nil {
 		return nil, err
 	}
 	return myContracts.Data, nil
@@ -346,7 +346,7 @@ type Accept struct {
 
 func (g Game) accept(id string) (Accept, error) {
 	var accept Accept
-	if _, err := g.do("my/contracts/{{.id}}/accept", "POST", map[string]string{
+	if err := g.do("my/contracts/{{.id}}/accept", "POST", map[string]string{
 		"id": id,
 	}, nil, &accept); err != nil {
 		return Accept{}, err
@@ -369,7 +369,7 @@ type MyShips struct {
 
 func (g Game) myShips() ([]Ship, error) {
 	var myShips MyShips
-	if _, err := g.do("my/ships", "GET", nil, nil, &myShips); err != nil {
+	if err := g.do("my/ships", "GET", nil, nil, &myShips); err != nil {
 		return nil, err
 	}
 	return myShips.Data, nil
@@ -381,7 +381,7 @@ type MyShipsBuy struct {
 
 func (g Game) myShipsBuy(waypoint, shipType string) (Ship, error) {
 	var myShipsBuy MyShipsBuy
-	if _, err := g.do("my/ships", "POST", nil, map[string]any{
+	if err := g.do("my/ships", "POST", nil, map[string]any{
 		"shipType":       shipType,
 		"waypointSymbol": waypoint,
 	}, &myShipsBuy); err != nil {
@@ -404,7 +404,7 @@ type MyShipsOrbit struct {
 
 func (g Game) myShipsOrbit(ship string) (ShipOrbit, error) {
 	var myShipsOrbit MyShipsOrbit
-	if _, err := g.do("my/ships/{{.ship}}/orbit", "POST", map[string]string{
+	if err := g.do("my/ships/{{.ship}}/orbit", "POST", map[string]string{
 		"ship": ship,
 	}, map[string]any{}, &myShipsOrbit); err != nil {
 		return ShipOrbit{}, err
@@ -417,7 +417,7 @@ type MyShipsDock struct {
 
 func (g Game) myShipsDock(ship string) (MyShipsDock, error) {
 	var myShipsDock MyShipsDock
-	if _, err := g.do("my/ships/{{.ship}}/dock", "POST", map[string]string{
+	if err := g.do("my/ships/{{.ship}}/dock", "POST", map[string]string{
 		"ship": ship,
 	}, map[string]any{}, &myShipsDock); err != nil {
 		return MyShipsDock{}, err
@@ -430,7 +430,7 @@ type MyShipsRefuel struct {
 
 func (g Game) myShipsRefuel(ship string) (MyShipsRefuel, error) {
 	var myShipsRefuel MyShipsRefuel
-	if _, err := g.do("my/ships/{{.ship}}/refuel", "POST", map[string]string{
+	if err := g.do("my/ships/{{.ship}}/refuel", "POST", map[string]string{
 		"ship": ship,
 	}, map[string]any{}, &myShipsRefuel); err != nil {
 		return MyShipsRefuel{}, err
@@ -456,7 +456,7 @@ type MyShipsExtract struct {
 
 func (g Game) myShipsExtract(ship string) (MyShipsExtract, error) {
 	var myShipsExtract MyShipsExtract
-	if _, err := g.do("my/ships/{{.ship}}/extract", "POST", map[string]string{
+	if err := g.do("my/ships/{{.ship}}/extract", "POST", map[string]string{
 		"ship": ship,
 	}, map[string]any{}, &myShipsExtract); err != nil {
 		return MyShipsExtract{}, err
@@ -481,7 +481,7 @@ type MyShipsCargo struct {
 
 func (g Game) myShipsCargo(ship string) (Cargo, error) {
 	var myShipsCargo MyShipsCargo
-	if _, err := g.do("my/ships/{{.ship}}/cargo", "GET", map[string]string{
+	if err := g.do("my/ships/{{.ship}}/cargo", "GET", map[string]string{
 		"ship": ship,
 	}, map[string]any{}, &myShipsCargo); err != nil {
 		return Cargo{}, err
@@ -494,7 +494,7 @@ type MyShipsNavigate struct {
 
 func (g Game) myShipsNavigate(ship, symbol string) (MyShipsNavigate, error) {
 	var myShipsNavigate MyShipsNavigate
-	if _, err := g.do("my/ships/{{.ship}}/navigate", "POST", map[string]string{
+	if err := g.do("my/ships/{{.ship}}/navigate", "POST", map[string]string{
 		"ship": ship,
 	}, map[string]any{
 		"waypointSymbol": symbol,
@@ -509,7 +509,7 @@ type MyShipsSell struct {
 
 func (g Game) myShipsSell(ship, symbol string, units int) (MyShipsSell, error) {
 	var myShipsSell MyShipsSell
-	if _, err := g.do("my/ships/{{.ship}}/sell", "POST", map[string]string{
+	if err := g.do("my/ships/{{.ship}}/sell", "POST", map[string]string{
 		"ship": ship,
 	}, map[string]any{
 		"symbol": symbol,
@@ -525,7 +525,7 @@ type MyShipsJettison struct {
 
 func (g Game) myShipsJettison(ship, symbol string, units int) (MyShipsJettison, error) {
 	var myShipsJettison MyShipsJettison
-	if _, err := g.do("my/ships/{{.ship}}/jettison", "POST", map[string]string{
+	if err := g.do("my/ships/{{.ship}}/jettison", "POST", map[string]string{
 		"ship": ship,
 	}, map[string]any{
 		"symbol": symbol,
@@ -540,59 +540,55 @@ const (
 	baseUrl = "https://api.spacetraders.io/v2"
 )
 
-func (g Game) do(pathTemplate, method string, templateData map[string]string, payloadData map[string]any, v any) (map[string]any, error) {
+func (g Game) do(pathTemplate, method string, templateData map[string]string, payloadData map[string]any, v any) error {
 	parsedTemplate, err := template.New("pathTemplate").Parse(pathTemplate)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	var builder strings.Builder
 	if err = parsedTemplate.Execute(&builder, templateData); err != nil {
-		return nil, err
+		return err
 	}
 	path := builder.String()
 	url := fmt.Sprintf("%s/%s", baseUrl, path)
 	payload, err := json.Marshal(payloadData)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(payload))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	req.Header.Add("Authorization", "Bearer "+g.Token)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := g.Client.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	time.Sleep(time.Second / 2)
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	var prettyJSON bytes.Buffer
 	err = json.Indent(&prettyJSON, body, "", "  ")
 	if err != nil {
-		return nil, err
+		return err
 	}
 	fmt.Printf(" => %d %s\n", resp.StatusCode, path)
 	fmt.Println(prettyJSON.String())
 	fmt.Printf(" => %d %s\n", resp.StatusCode, path)
 	var res map[string]any
 	if err := json.Unmarshal(body, &res); err != nil {
-		return nil, err
+		return err
 	}
 	if v != nil {
 		if err := json.Unmarshal(body, v); err != nil {
-			return nil, err
+			return err
 		}
 	}
-	data, err := getMapField(res, "data")
-	if err != nil {
-		return res, nil
-	}
-	return data, nil
+	return nil
 }
 
 func getStringField(data map[string]any, key string) (string, error) {

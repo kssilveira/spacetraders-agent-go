@@ -24,7 +24,7 @@ func (a Agent) All() error {
 	if err != nil {
 		return err
 	}
-	isDone, err := a.isDone(ship)
+	isDone, units, err := a.isDone(ship)
 	if err != nil {
 		return err
 	}
@@ -46,9 +46,11 @@ func (a Agent) All() error {
 			if err != nil {
 				return err
 			}
+			// deliver, err := a.Client.myContractsDeliver(contract.ID, ship, trade, units)
 			fmt.Printf("%#v\n", navigate)
 			fmt.Printf("%#v\n", contractID)
 			fmt.Printf("%#v\n", trade)
+			fmt.Printf("%#v\n", units)
 		}
 		break
 	}
@@ -181,7 +183,7 @@ func (a Agent) extract(ship string, contractTradeSymbols map[string]string) erro
 		if err != nil {
 			return err
 		}
-		isDone, err := a.isDone(ship)
+		isDone, _, err := a.isDone(ship)
 		if err != nil {
 			return err
 		}
@@ -237,13 +239,13 @@ func (a Agent) sell(ship string, contractTradeSymbols map[string]string, isOrbit
 	return isOrbit, nil
 }
 
-func (a Agent) isDone(ship string) (bool, error) {
+func (a Agent) isDone(ship string) (bool, int, error) {
 	cargo, err := a.Client.MyShipsCargo(ship)
 	if err != nil {
-		return false, err
+		return false, 0, err
 	}
 	if cargo.Units == cargo.Capacity && len(cargo.Inventory) == 1 {
-		return true, nil
+		return true, cargo.Units, nil
 	}
-	return false, nil
+	return false, 0, nil
 }

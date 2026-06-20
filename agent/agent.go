@@ -16,7 +16,7 @@ func (a Agent) All() error {
 	if err != nil {
 		return err
 	}
-	contractTradeSymbols, err := a.acceptContract()
+	contractID, contractTradeSymbols, err := a.acceptContract()
 	if err != nil {
 		return err
 	}
@@ -47,6 +47,7 @@ func (a Agent) All() error {
 				return err
 			}
 			fmt.Printf("%#v\n", navigate)
+			fmt.Printf("%#v\n", contractID)
 			fmt.Printf("%#v\n", trade)
 		}
 		break
@@ -68,16 +69,16 @@ func (a Agent) getHeadquarters() (string, error) {
 	return headquarters, nil
 }
 
-func (a Agent) acceptContract() (map[string]string, error) {
+func (a Agent) acceptContract() (string, map[string]string, error) {
 	contracts, err := a.Client.MyContracts()
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 	contract := contracts[0]
 	if !contract.Accepted {
 		accepted, err := a.Client.Accept(contract.ID)
 		if err != nil {
-			return nil, err
+			return "", nil, err
 		}
 		fmt.Printf("%#v\n", accepted)
 	}
@@ -85,7 +86,7 @@ func (a Agent) acceptContract() (map[string]string, error) {
 	for _, deliver := range contract.Terms.Deliver {
 		res[deliver.TradeSymbol] = deliver.DestinationSymbol
 	}
-	return res, nil
+	return contract.ID, res, nil
 }
 
 func (a Agent) maybeBuyShip(headquarters string) (string, error) {

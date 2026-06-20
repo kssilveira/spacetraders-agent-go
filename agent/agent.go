@@ -16,29 +16,42 @@ func (a Agent) All() error {
 	if err != nil {
 		return err
 	}
-	contractID, symbolToDeliver, err := a.acceptContract()
-	if err != nil {
-		return err
-	}
 	ship, err := a.maybeBuyShip(headquarters)
 	if err != nil {
 		return err
 	}
-	isDone, units, err := a.isDone(ship)
-	if err != nil {
-		return err
-	}
-	if !isDone {
-		if err := a.navigateAndExtract(headquarters, ship, symbolToDeliver); err != nil {
-			return err
-		}
-		isDone, units, err = a.isDone(ship)
+	for {
+		contractID, symbolToDeliver, err := a.acceptContract()
 		if err != nil {
 			return err
 		}
-	}
-	if err := a.deliver(contractID, ship, units, symbolToDeliver); err != nil {
-		return err
+		found := false
+		for symbol, deliver := range symbolToDeliver {
+			if deliver.UnitsFulfilled < deliver.UnitsRequired {
+				fmt.Printf("%s %#v\n", symbol, deliver)
+				found = true
+				break
+			}
+		}
+		if !found {
+			break
+		}
+		isDone, units, err := a.isDone(ship)
+		if err != nil {
+			return err
+		}
+		if !isDone {
+			if err := a.navigateAndExtract(headquarters, ship, symbolToDeliver); err != nil {
+				return err
+			}
+			isDone, units, err = a.isDone(ship)
+			if err != nil {
+				return err
+			}
+		}
+		if err := a.deliver(contractID, ship, units, symbolToDeliver); err != nil {
+			return err
+		}
 	}
 	return nil
 }

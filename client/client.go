@@ -102,6 +102,8 @@ func (c Client) WaypointMarket(waypoint string) (WaypointMarket, error) {
 type Deliver struct {
 	TradeSymbol       string `json:"tradeSymbol"`
 	DestinationSymbol string `json:"destinationSymbol"`
+	UnitsRequired     int    `json:"unitsRequired"`
+	UnitsFulfilled    int    `json:"unitsFulfilled"`
 }
 
 type Terms struct {

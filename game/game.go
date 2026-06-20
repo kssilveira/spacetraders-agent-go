@@ -122,15 +122,7 @@ func (g Game) doBuyShip(headquarters string) (string, error) {
 }
 
 func (g Game) navigate(headquarters, ship string) error {
-	orbit, err := g.myShipsAction(ship, "orbit", "POST")
-	if err != nil {
-		return err
-	}
-	nav, err := getMapField(orbit, "nav")
-	if err != nil {
-		return err
-	}
-	shipWaypoint, err := getStringField(nav, "waypointSymbol")
+	orbit, err := g.myShipsOrbit(ship)
 	if err != nil {
 		return err
 	}
@@ -139,7 +131,7 @@ func (g Game) navigate(headquarters, ship string) error {
 		return err
 	}
 	asteroid := asteroidWaypoints[0].Symbol
-	if shipWaypoint != asteroid {
+	if orbit.Nav.WaypointSymbol != asteroid {
 		navigate, err := g.myShipsNavigate(ship, asteroid)
 		if err != nil {
 			return err
@@ -156,7 +148,7 @@ func (g Game) navigate(headquarters, ship string) error {
 		}
 		fmt.Printf("%d\n", len(refuel))
 	}
-	market, err := g.waypointAction(shipWaypoint, "market")
+	market, err := g.waypointAction(orbit.Nav.WaypointSymbol, "market")
 	if err != nil {
 		return err
 	}
@@ -436,6 +428,28 @@ func (g Game) myShipsBuy(waypoint, shipType string) (Ship, error) {
 		return Ship{}, nil
 	}
 	return myShipsBuy.Data, nil
+}
+
+type Nav struct {
+	WaypointSymbol string `json:"waypointSymbol"`
+}
+
+type ShipOrbit struct {
+	Nav Nav `json:"nav"`
+}
+
+type MyShipsOrbit struct {
+	Data ShipOrbit `json:"data"`
+}
+
+func (g Game) myShipsOrbit(ship string) (ShipOrbit, error) {
+	var myShipsOrbit MyShipsOrbit
+	if _, err := g.do("my/ships/{{.ship}}/orbit", "POST", map[string]string{
+		"ship": ship,
+	}, map[string]any{}, &myShipsOrbit); err != nil {
+		return ShipOrbit{}, err
+	}
+	return myShipsOrbit.Data, nil
 }
 
 func (g Game) myShipsAction(ship, action, method string) (map[string]any, error) {

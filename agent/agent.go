@@ -29,10 +29,7 @@ func (a Agent) All() error {
 		return err
 	}
 	if !isDone {
-		if err := a.navigate(headquarters, ship); err != nil {
-			return err
-		}
-		if err := a.extract(ship, symbolToDeliver); err != nil {
+		if err := a.navigateAndExtract(headquarters, ship, symbolToDeliver); err != nil {
 			return err
 		}
 	}
@@ -154,7 +151,7 @@ func (a Agent) doBuyShip(headquarters string) (string, error) {
 	return "", fmt.Errorf("failed to buy ship")
 }
 
-func (a Agent) navigate(headquarters, ship string) error {
+func (a Agent) navigateAndExtract(headquarters, ship string, symbolToDeliver map[string]client.Deliver) error {
 	orbit, err := a.Client.MyShipsOrbit(ship)
 	if err != nil {
 		return err
@@ -186,6 +183,9 @@ func (a Agent) navigate(headquarters, ship string) error {
 		return err
 	}
 	fmt.Printf("%#v\n", market)
+	if err := a.extract(ship, symbolToDeliver); err != nil {
+		return err
+	}
 	return nil
 }
 

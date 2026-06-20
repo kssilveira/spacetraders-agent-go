@@ -190,29 +190,13 @@ func (g Game) extract(ship string, contractTradeSymbols map[string]any) error {
 }
 
 func (g Game) sell(ship string, contractTradeSymbols map[string]any, isOrbit bool) (bool, error) {
-	cargo, err := g.myShipsAction(ship, "cargo", "GET")
+	cargo, err := g.myShipsCargo(ship)
 	if err != nil {
 		return false, err
 	}
-	inventory, err := getListField(cargo, "inventory")
-	if err != nil {
-		return false, err
-	}
-	for i := range inventory {
-		item, err := getMap(inventory[i])
-		if err != nil {
-			return false, err
-		}
-		symbol, err := getStringField(item, "symbol")
-		if err != nil {
-			return false, err
-		}
-		if _, ok := contractTradeSymbols[symbol]; ok {
+	for _, item := range cargo.Inventory {
+		if _, ok := contractTradeSymbols[item.Symbol]; ok {
 			continue
-		}
-		units, err := getIntField(item, "units")
-		if err != nil {
-			return false, err
 		}
 		if isOrbit {
 			isOrbit = false
@@ -222,12 +206,12 @@ func (g Game) sell(ship string, contractTradeSymbols map[string]any, isOrbit boo
 			}
 			fmt.Printf("%d\n", len(dock))
 		}
-		sell, err := g.myShipsSell(ship, symbol, units)
+		sell, err := g.myShipsSell(ship, item.Symbol, item.Units)
 		if err != nil {
 			return false, err
 		}
 		fmt.Printf("%d\n", len(sell))
-		jettison, err := g.myShipsJettison(ship, symbol, units)
+		jettison, err := g.myShipsJettison(ship, item.Symbol, item.Units)
 		if err != nil {
 			return false, err
 		}
@@ -490,6 +474,31 @@ func (g Game) myShipsExtract(ship string) (MyShipsExtract, error) {
 		return MyShipsExtract{}, err
 	}
 	return myShipsExtract, nil
+}
+
+type Inventory struct {
+	Symbol string `json:"symbol"`
+	Units  int    `json:"units"`
+}
+
+type Cargo struct {
+	Capacity  int         `json:"capacity"`
+	Units     int         `json:"units"`
+	Inventory []Inventory `json:"inventory"`
+}
+
+type MyShipsCargo struct {
+	Data Cargo `json:"data"`
+}
+
+func (g Game) myShipsCargo(ship string) (Cargo, error) {
+	var myShipsCargo MyShipsCargo
+	if _, err := g.do("my/ships/{{.ship}}/cargo", "GET", map[string]string{
+		"ship": ship,
+	}, map[string]any{}, &myShipsCargo); err != nil {
+		return Cargo{}, err
+	}
+	return myShipsCargo.Data, nil
 }
 
 func (g Game) myShipsAction(ship, action, method string) (map[string]any, error) {

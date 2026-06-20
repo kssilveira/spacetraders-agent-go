@@ -102,16 +102,8 @@ func (g Game) doBuyShip(headquarters string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	for i := range shipyardWaypoints {
-		shipyardWaypoint, err := getMap(shipyardWaypoints[i])
-		if err != nil {
-			return "", err
-		}
-		symbol, err := getStringField(shipyardWaypoint, "symbol")
-		if err != nil {
-			return "", err
-		}
-		shipyard, err := g.waypointAction(symbol, "shipyard")
+	for _, shipyardWaypoint := range shipyardWaypoints {
+		shipyard, err := g.waypointAction(shipyardWaypoint.Symbol, "shipyard")
 		if err != nil {
 			return "", err
 		}
@@ -135,7 +127,7 @@ func (g Game) doBuyShip(headquarters string) (string, error) {
 			if shipType != "SHIP_MINING_DRONE" {
 				continue
 			}
-			got, err := g.myShipsBuy(symbol, "SHIP_MINING_DRONE")
+			got, err := g.myShipsBuy(shipyardWaypoint.Symbol, "SHIP_MINING_DRONE")
 			if err != nil {
 				return "", err
 			}
@@ -166,14 +158,7 @@ func (g Game) navigate(headquarters, ship string) error {
 	if err != nil {
 		return err
 	}
-	asteroidWaypoint, err := getMap(asteroidWaypoints[0])
-	if err != nil {
-		return err
-	}
-	asteroid, err := getStringField(asteroidWaypoint, "symbol")
-	if err != nil {
-		return err
-	}
+	asteroid := asteroidWaypoints[0].Symbol
 	if shipWaypoint != asteroid {
 		navigate, err := g.myShipsNavigate(ship, asteroid)
 		if err != nil {
@@ -337,6 +322,7 @@ func (g Game) myAgent() (Agent, error) {
 }
 
 type Waypoint struct {
+	Symbol string `json:"symbol"`
 }
 
 func (g Game) waypoint(waypoint string) (Waypoint, error) {
@@ -350,15 +336,19 @@ func (g Game) waypoint(waypoint string) (Waypoint, error) {
 	return res, nil
 }
 
-func (g Game) waypointsWithFilter(waypoint, filter string) ([]any, error) {
-	data, err := g.do("systems/{{.system}}/waypoints?{{.filter}}", "GET", map[string]string{
+type Waypoints struct {
+	Data []Waypoint `json:"data"`
+}
+
+func (g Game) waypointsWithFilter(waypoint, filter string) ([]Waypoint, error) {
+	var waypoints Waypoints
+	if _, err := g.do("systems/{{.system}}/waypoints?{{.filter}}", "GET", map[string]string{
 		"system": strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"filter": filter,
-	}, nil, nil)
-	if err != nil {
+	}, nil, &waypoints); err != nil {
 		return nil, err
 	}
-	return getListField(data, "data")
+	return waypoints.Data, nil
 }
 
 func (g Game) waypointAction(waypoint, action string) (map[string]any, error) {

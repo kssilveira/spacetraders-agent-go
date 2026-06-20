@@ -215,7 +215,7 @@ func (g Game) sell(ship string, contractTradeSymbols map[string]any, isOrbit boo
 		if err != nil {
 			return false, err
 		}
-		fmt.Printf("%d\n", len(jettison))
+		fmt.Printf("%#v\n", jettison)
 	}
 	return isOrbit, nil
 }
@@ -539,13 +539,20 @@ func (g Game) myShipsSell(ship, symbol string, units int) (MyShipsSell, error) {
 	return myShipsSell, nil
 }
 
-func (g Game) myShipsJettison(ship, symbol string, units int) (map[string]any, error) {
-	return g.do("my/ships/{{.ship}}/jettison", "POST", map[string]string{
+type MyShipsJettison struct {
+}
+
+func (g Game) myShipsJettison(ship, symbol string, units int) (MyShipsJettison, error) {
+	var myShipsJettison MyShipsJettison
+	if _, err := g.do("my/ships/{{.ship}}/jettison", "POST", map[string]string{
 		"ship": ship,
 	}, map[string]any{
 		"symbol": symbol,
 		"units":  units,
-	}, nil)
+	}, &myShipsJettison); err != nil {
+		return MyShipsJettison{}, err
+	}
+	return myShipsJettison, nil
 }
 
 const (

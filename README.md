@@ -1,6 +1,6 @@
 # spacetraders-agent-go
 
-https://spacetraders.io agent in Go.
+https://spacetraders.io agent in Go using https://spacetraders.io/openapi.
 
 ## TODO
 
@@ -53,76 +53,3 @@ curl --request POST \
    }'
 ```
 
-```
-curl --request  \
- --url 'https://api.spacetraders.io/v2/factions'
-```
-
-```
-curl --request  \
- --url 'https://api.spacetraders.io/v2/systems'
-```
-
-```
-curl --request  \
- --url 'https://api.spacetraders.io/v2/systems/X1-KY89/waypoints'
-```
-
-```
-curl --request PATCH \
- --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/nav' \
- --header 'Content-Type: application/json' \
- --data '{
-    "flightMode": ""
-   }'
-```
-
-```
-curl --request POST \
- --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/warp' \
- --header 'Content-Type: application/json' \
- --data '{
-    "systemSymbol": ""
-   }'
-```
-
-```
-curl --request POST \
- --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/jump' \
- --header 'Content-Type: application/json' \
- --data '{
-    "systemSymbol": ""
-   }'
-```
-
-```
-curl --request POST \
- --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/refuel' \
- --header 'Content-Type: application/json' \
- --data '{
-    "fromCargo": ""
-   }'
-```
-
-```
-curl --request POST \
- --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/siphon'
-```
-
-```
-curl --request POST \
- --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/repair'
-```
-
-```
-curl 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/repair'
-```
-
-```
-curl --request POST \
- --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/scrap'
-```
-
-```
-curl 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/scrap'
-```

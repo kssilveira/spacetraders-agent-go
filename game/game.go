@@ -458,6 +458,10 @@ func (g Game) myShipsJettison(ship, symbol string, units int) (map[string]any, e
 	})
 }
 
+const (
+	baseUrl = "https://api.spacetraders.io/v2"
+)
+
 func (g Game) do(pathTemplate, method string, templateData map[string]string, payloadData map[string]any) (map[string]any, error) {
 	parsedTemplate, err := template.New("pathTemplate").Parse(pathTemplate)
 	if err != nil {
@@ -507,10 +511,6 @@ func (g Game) do(pathTemplate, method string, templateData map[string]string, pa
 	}
 	return data, nil
 }
-
-const (
-	baseUrl = "https://api.spacetraders.io/v2"
-)
 
 func getStringField(data map[string]any, key string) (string, error) {
 	res, ok := data[key].(string)

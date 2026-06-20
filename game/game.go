@@ -142,11 +142,11 @@ func (g Game) navigate(headquarters, ship string) error {
 			return err
 		}
 		fmt.Printf("%#v\n", dock)
-		refuel, err := g.myShipsAction(ship, "refuel", "POST")
+		refuel, err := g.myShipsRefuel(ship)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%d\n", len(refuel))
+		fmt.Printf("%#v\n", refuel)
 	}
 	market, err := g.waypointAction(orbit.Nav.WaypointSymbol, "market")
 	if err != nil {
@@ -463,6 +463,19 @@ func (g Game) myShipsDock(ship string) (MyShipsDock, error) {
 		return MyShipsDock{}, err
 	}
 	return myShipsDock, nil
+}
+
+type MyShipsRefuel struct {
+}
+
+func (g Game) myShipsRefuel(ship string) (MyShipsRefuel, error) {
+	var myShipsRefuel MyShipsRefuel
+	if _, err := g.do("my/ships/{{.ship}}/refuel", "POST", map[string]string{
+		"ship": ship,
+	}, map[string]any{}, &myShipsRefuel); err != nil {
+		return MyShipsRefuel{}, err
+	}
+	return myShipsRefuel, nil
 }
 
 func (g Game) myShipsAction(ship, action, method string) (map[string]any, error) {

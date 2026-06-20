@@ -173,11 +173,11 @@ func (g Game) extract(ship string, contractTradeSymbols map[string]any) error {
 		}
 		if !isOrbit {
 			isOrbit = true
-			orbit, err := g.myShipsAction(ship, "orbit", "POST")
+			orbit, err := g.myShipsOrbit(ship)
 			if err != nil {
 				return err
 			}
-			fmt.Printf("%d\n", len(orbit))
+			fmt.Printf("%#v\n", orbit)
 		}
 		extract, err := g.myShipsAction(ship, "extract", "POST")
 		if err != nil {

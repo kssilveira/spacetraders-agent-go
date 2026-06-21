@@ -11,6 +11,7 @@ import (
 type State struct {
 	SymbolToDeliver map[string]client.Deliver
 	SymbolToCargo   map[string]client.Inventory
+	Capacity        int
 }
 
 type Agent struct {
@@ -247,6 +248,7 @@ func (a *Agent) sell(ship string, symbolToDeliver map[string]client.Deliver, isO
 		a.State.SymbolToCargo = map[string]client.Inventory{}
 		if _, ok := symbolToDeliver[item.Symbol]; ok {
 			a.State.SymbolToCargo[item.Symbol] = item
+			continue
 		}
 		if isOrbit {
 			isOrbit = false
@@ -275,6 +277,7 @@ func (a *Agent) isDone(ship string) (bool, int, error) {
 	if err != nil {
 		return false, 0, err
 	}
+	a.State.Capacity = cargo.Capacity
 	if cargo.Units == cargo.Capacity && len(cargo.Inventory) == 1 {
 		return true, cargo.Units, nil
 	}

@@ -312,8 +312,7 @@ func (a *Agent) dock(ship string) error {
 		return err
 	}
 	if dock.Error.Data.SecondsToArrival != 0 {
-		fmt.Printf("sleep %d\n", dock.Error.Data.SecondsToArrival)
-		time.Sleep(time.Duration(dock.Error.Data.SecondsToArrival) * time.Second)
+		a.sleep(dock.Error.Data.SecondsToArrival)
 		dock, err = a.Client.Dock(ship)
 		if err != nil {
 			return err
@@ -329,8 +328,7 @@ func (a *Agent) orbit(ship string) (client.OrbitRes, error) {
 		return client.OrbitRes{}, err
 	}
 	if orbit.Error.Data.SecondsToArrival != 0 {
-		fmt.Printf("sleep %d\n", orbit.Error.Data.SecondsToArrival)
-		time.Sleep(time.Duration(orbit.Error.Data.SecondsToArrival) * time.Second)
+		a.sleep(orbit.Error.Data.SecondsToArrival)
 		orbit, err = a.Client.Orbit(ship)
 		if err != nil {
 			return client.OrbitRes{}, err

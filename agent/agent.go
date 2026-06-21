@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -234,7 +235,9 @@ func (a *Agent) extract(ship string, symbolToDeliver map[string]client.Deliver) 
 		if err != nil {
 			return err
 		}
-		a.sleep(extract.Error.Data.Cooldown.RemainingSeconds)
+		if err := a.sleep(extract.Error.Data.Cooldown.RemainingSeconds); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -315,7 +318,9 @@ func (a *Agent) dock(ship string) error {
 		return err
 	}
 	if dock.Error.Data.SecondsToArrival != 0 {
-		a.sleep(dock.Error.Data.SecondsToArrival)
+		if err := a.sleep(dock.Error.Data.SecondsToArrival); err != nil {
+			return err
+		}
 		dock, err = a.Client.Dock(ship)
 		if err != nil {
 			return err
@@ -331,7 +336,9 @@ func (a *Agent) orbit(ship string) (client.OrbitRes, error) {
 		return client.OrbitRes{}, err
 	}
 	if orbit.Error.Data.SecondsToArrival != 0 {
-		a.sleep(orbit.Error.Data.SecondsToArrival)
+		if err := a.sleep(orbit.Error.Data.SecondsToArrival); err != nil {
+			return client.OrbitRes{}, err
+		}
 		orbit, err = a.Client.Orbit(ship)
 		if err != nil {
 			return client.OrbitRes{}, err
@@ -340,11 +347,16 @@ func (a *Agent) orbit(ship string) (client.OrbitRes, error) {
 	return orbit, nil
 }
 
-func (a *Agent) sleep(seconds int) {
+func (a *Agent) sleep(seconds int) error {
 	if seconds == 0 {
-		return
+		return nil
 	}
 	fmt.Printf("sleep %d\n", seconds)
-	fmt.Printf("State %#v\n", a.State)
+	state, err := json.MarshalIndent(a.State, "", "  ")
+	if err != nil {
+		return err
+	}
+	fmt.Printf("state %s\n", string(state))
 	time.Sleep(time.Duration(seconds) * time.Second)
+	return nil
 }

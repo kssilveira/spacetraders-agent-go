@@ -8,8 +8,14 @@ import (
 	"github.com/kssilveira/spacetraders-agent-go/token"
 )
 
+type State struct {
+	SymbolToDeliver map[string]client.Deliver
+	SymbolToCargo   map[string]client.Inventory
+}
+
 type Agent struct {
 	Client client.Client
+	State  State
 }
 
 func (a *Agent) All() error {
@@ -26,6 +32,7 @@ func (a *Agent) All() error {
 		if err != nil {
 			return err
 		}
+		a.State.SymbolToDeliver = symbolToDeliver
 		found := false
 		for symbol, deliver := range symbolToDeliver {
 			if deliver.UnitsFulfilled < deliver.UnitsRequired {
@@ -226,10 +233,7 @@ func (a *Agent) extract(ship string, symbolToDeliver map[string]client.Deliver) 
 		if err != nil {
 			return err
 		}
-		if extract.Error.Data.Cooldown.RemainingSeconds != 0 {
-			fmt.Printf("sleep %d\n", extract.Error.Data.Cooldown.RemainingSeconds)
-			time.Sleep(time.Duration(extract.Error.Data.Cooldown.RemainingSeconds) * time.Second)
-		}
+		a.sleep(extract.Error.Data.Cooldown.RemainingSeconds)
 	}
 	return nil
 }
@@ -240,8 +244,9 @@ func (a *Agent) sell(ship string, symbolToDeliver map[string]client.Deliver, isO
 		return false, err
 	}
 	for _, item := range cargo.Inventory {
+		a.State.SymbolToCargo = map[string]client.Inventory{}
 		if _, ok := symbolToDeliver[item.Symbol]; ok {
-			continue
+			a.State.SymbolToCargo[item.Symbol] = item
 		}
 		if isOrbit {
 			isOrbit = false
@@ -332,4 +337,13 @@ func (a *Agent) orbit(ship string) (client.OrbitRes, error) {
 		}
 	}
 	return orbit, nil
+}
+
+func (a *Agent) sleep(seconds int) {
+	if seconds == 0 {
+		return
+	}
+	fmt.Printf("sleep %d\n", seconds)
+	fmt.Printf("State %#v\n", a.State)
+	time.Sleep(time.Duration(seconds) * time.Second)
 }

@@ -2,16 +2,58 @@ package agent
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/kssilveira/spacetraders-agent-go/client"
 )
 
+func GetAccountToken() (string, error) {
+	return getToken("account")
+}
+
+func GetAgentToken() (string, error) {
+	return getToken("agent")
+}
+
+func getToken(name string) (string, error) {
+	tokenPath, err := tokenPath(name)
+	if err != nil {
+		return "", err
+	}
+	tokenBytes, err := os.ReadFile(tokenPath)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(tokenBytes)), nil
+}
+
+func tokenPath(name string) (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(homeDir, ".spacetraders_"+name), nil
+}
+
+func setAgentToken(token string) error {
+	tokenPath, err := tokenPath("agent")
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(tokenPath, []byte(token), 0644); err != nil {
+		return err
+	}
+	return nil
+}
+
 type Agent struct {
 	Client client.Client
 }
 
-func (a Agent) All() error {
+func (a *Agent) All() error {
 	headquarters, err := a.getHeadquarters()
 	if err != nil {
 		return err
@@ -56,12 +98,26 @@ func (a Agent) All() error {
 	return nil
 }
 
-func (a Agent) getHeadquarters() (string, error) {
+func (a *Agent) getHeadquarters() (string, error) {
 	agent, err := a.Client.MyAgent()
 	if err != nil {
 		return "", err
 	}
-	headquarters := agent.Headquarters
+	if agent.Error.Code != 0 {
+		register, err := a.Client.Register("KAUE", "AEGIS")
+		if err != nil {
+			return "", err
+		}
+		if err := setAgentToken(register.Token); err != nil {
+			return "", err
+		}
+		a.Client.AgentToken = register.Token
+		agent, err = a.Client.MyAgent()
+		if err != nil {
+			return "", err
+		}
+	}
+	headquarters := agent.Data.Headquarters
 	waypoint, err := a.Client.Waypoint(headquarters)
 	if err != nil {
 		return "", err
@@ -70,7 +126,7 @@ func (a Agent) getHeadquarters() (string, error) {
 	return headquarters, nil
 }
 
-func (a Agent) acceptContract() (string, map[string]client.Deliver, error) {
+func (a *Agent) acceptContract() (string, map[string]client.Deliver, error) {
 	contracts, err := a.Client.MyContracts()
 	if err != nil {
 		return "", nil, err
@@ -90,7 +146,7 @@ func (a Agent) acceptContract() (string, map[string]client.Deliver, error) {
 	return contract.ID, res, nil
 }
 
-func (a Agent) maybeBuyShip(headquarters string) (string, error) {
+func (a *Agent) maybeBuyShip(headquarters string) (string, error) {
 	symbol, err := a.excavator()
 	if err != nil {
 		return "", err
@@ -110,7 +166,7 @@ func (a Agent) maybeBuyShip(headquarters string) (string, error) {
 	return ship, nil
 }
 
-func (a Agent) excavator() (string, error) {
+func (a *Agent) excavator() (string, error) {
 	ships, err := a.Client.MyShips()
 	if err != nil {
 		return "", err
@@ -124,7 +180,7 @@ func (a Agent) excavator() (string, error) {
 	return "", nil
 }
 
-func (a Agent) doBuyShip(headquarters string) (string, error) {
+func (a *Agent) doBuyShip(headquarters string) (string, error) {
 	shipyardWaypoints, err := a.Client.WaypointsWithFilter(headquarters, "traits=SHIPYARD")
 	if err != nil {
 		return "", err
@@ -148,7 +204,7 @@ func (a Agent) doBuyShip(headquarters string) (string, error) {
 	return "", fmt.Errorf("failed to buy ship")
 }
 
-func (a Agent) navigateAndExtract(headquarters, ship string, symbolToDeliver map[string]client.Deliver) error {
+func (a *Agent) navigateAndExtract(headquarters, ship string, symbolToDeliver map[string]client.Deliver) error {
 	orbit, err := a.Client.MyShipsOrbit(ship)
 	if err != nil {
 		return err
@@ -184,7 +240,7 @@ func (a Agent) navigateAndExtract(headquarters, ship string, symbolToDeliver map
 	return nil
 }
 
-func (a Agent) extract(ship string, symbolToDeliver map[string]client.Deliver) error {
+func (a *Agent) extract(ship string, symbolToDeliver map[string]client.Deliver) error {
 	isOrbit := false
 	var err error
 	for {
@@ -217,7 +273,7 @@ func (a Agent) extract(ship string, symbolToDeliver map[string]client.Deliver) e
 	return nil
 }
 
-func (a Agent) sell(ship string, symbolToDeliver map[string]client.Deliver, isOrbit bool) (bool, error) {
+func (a *Agent) sell(ship string, symbolToDeliver map[string]client.Deliver, isOrbit bool) (bool, error) {
 	cargo, err := a.Client.MyShipsCargo(ship)
 	if err != nil {
 		return false, err
@@ -248,7 +304,7 @@ func (a Agent) sell(ship string, symbolToDeliver map[string]client.Deliver, isOr
 	return isOrbit, nil
 }
 
-func (a Agent) isDone(ship string) (bool, int, error) {
+func (a *Agent) isDone(ship string) (bool, int, error) {
 	cargo, err := a.Client.MyShipsCargo(ship)
 	if err != nil {
 		return false, 0, err
@@ -259,7 +315,7 @@ func (a Agent) isDone(ship string) (bool, int, error) {
 	return false, 0, nil
 }
 
-func (a Agent) deliver(contractID, ship string, units int, symbolToDeliver map[string]client.Deliver) error {
+func (a *Agent) deliver(contractID, ship string, units int, symbolToDeliver map[string]client.Deliver) error {
 	for trade, deliver := range symbolToDeliver {
 		orbit, err := a.Client.MyShipsOrbit(ship)
 		if err != nil {
@@ -284,7 +340,7 @@ func (a Agent) deliver(contractID, ship string, units int, symbolToDeliver map[s
 	return nil
 }
 
-func (a Agent) dock(ship string) error {
+func (a *Agent) dock(ship string) error {
 	dock, err := a.Client.MyShipsDock(ship)
 	if err != nil {
 		return err

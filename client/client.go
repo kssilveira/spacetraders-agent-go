@@ -12,8 +12,32 @@ import (
 )
 
 type Client struct {
-	Token  string
-	Client *http.Client
+	AccountToken string
+	AgentToken   string
+	Client       *http.Client
+}
+
+type RegisterData struct {
+	Token string `json:"token"`
+}
+
+type Register struct {
+	Data RegisterData `json:"data"`
+}
+
+func (c Client) Register(symbol, faction string) (RegisterData, error) {
+	var res Register
+	if err := c.do("register", &res, Do{IsAccount: true, Method: "POST", Payload: map[string]any{
+		"symbol":  symbol,
+		"faction": faction,
+	}}); err != nil {
+		return RegisterData{}, err
+	}
+	return res.Data, nil
+}
+
+type MyAgentError struct {
+	Code int `json:"code"`
 }
 
 type MyAgentData struct {
@@ -21,15 +45,16 @@ type MyAgentData struct {
 }
 
 type MyAgent struct {
-	Data MyAgentData `json:"data"`
+	Data  MyAgentData  `json:"data"`
+	Error MyAgentError `json:"error"`
 }
 
-func (c Client) MyAgent() (MyAgentData, error) {
+func (c Client) MyAgent() (MyAgent, error) {
 	var myAgent MyAgent
 	if err := c.do("my/agent", &myAgent, Do{}); err != nil {
-		return MyAgentData{}, err
+		return MyAgent{}, err
 	}
-	return myAgent.Data, nil
+	return myAgent, nil
 }
 
 type Waypoint struct {
@@ -179,8 +204,12 @@ func (c Client) MyShips() ([]Ship, error) {
 	return myShips.Data, nil
 }
 
+type MyShipsBuyData struct {
+	Ship Ship `json:"ship"`
+}
+
 type MyShipsBuy struct {
-	Data Ship `json:"data"`
+	Data MyShipsBuyData `json:"data"`
 }
 
 func (c Client) MyShipsBuy(waypoint, shipType string) (Ship, error) {
@@ -191,7 +220,7 @@ func (c Client) MyShipsBuy(waypoint, shipType string) (Ship, error) {
 	}}); err != nil {
 		return Ship{}, nil
 	}
-	return myShipsBuy.Data, nil
+	return myShipsBuy.Data.Ship, nil
 }
 
 type Nav struct {
@@ -350,9 +379,10 @@ func (c Client) MyShipsJettison(ship, symbol string, units int) (MyShipsJettison
 }
 
 type Do struct {
-	Method   string
-	Template map[string]string
-	Payload  map[string]any
+	IsAccount bool
+	Method    string
+	Template  map[string]string
+	Payload   map[string]any
 }
 
 func (c Client) do(pathTemplate string, value any, cfg Do) error {
@@ -374,7 +404,11 @@ func (c Client) do(pathTemplate string, value any, cfg Do) error {
 	if err != nil {
 		return err
 	}
-	req.Header.Add("Authorization", "Bearer "+c.Token)
+	token := c.AgentToken
+	if cfg.IsAccount {
+		token = c.AccountToken
+	}
+	req.Header.Add("Authorization", "Bearer "+token)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := c.Client.Do(req)
 	if err != nil {

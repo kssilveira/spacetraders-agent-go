@@ -205,7 +205,7 @@ func (a *Agent) doBuyShip(headquarters string) (string, error) {
 }
 
 func (a *Agent) navigateAndExtract(headquarters, ship string, symbolToDeliver map[string]client.Deliver) error {
-	orbit, err := a.Client.MyShipsOrbit(ship)
+	orbit, err := a.orbit(ship)
 	if err != nil {
 		return err
 	}
@@ -214,7 +214,7 @@ func (a *Agent) navigateAndExtract(headquarters, ship string, symbolToDeliver ma
 		return err
 	}
 	asteroid := asteroidWaypoints[0].Symbol
-	if orbit.Nav.WaypointSymbol != asteroid {
+	if orbit.Data.Nav.WaypointSymbol != asteroid {
 		navigate, err := a.Client.MyShipsNavigate(ship, asteroid)
 		if err != nil {
 			return err
@@ -229,7 +229,7 @@ func (a *Agent) navigateAndExtract(headquarters, ship string, symbolToDeliver ma
 		return err
 	}
 	fmt.Printf("%#v\n", refuel)
-	market, err := a.Client.WaypointMarket(orbit.Nav.WaypointSymbol)
+	market, err := a.Client.WaypointMarket(orbit.Data.Nav.WaypointSymbol)
 	if err != nil {
 		return err
 	}
@@ -321,7 +321,7 @@ func (a *Agent) deliver(contractID, ship string, units int, symbolToDeliver map[
 		if err != nil {
 			return err
 		}
-		if orbit.Nav.WaypointSymbol != deliver.DestinationSymbol {
+		if orbit.Data.Nav.WaypointSymbol != deliver.DestinationSymbol {
 			navigate, err := a.Client.MyShipsNavigate(ship, deliver.DestinationSymbol)
 			if err != nil {
 				return err
@@ -353,4 +353,18 @@ func (a *Agent) dock(ship string) error {
 	}
 	fmt.Printf("%#v\n", dock)
 	return nil
+}
+
+func (a *Agent) orbit(ship string) (client.MyShipsOrbit, error) {
+	orbit, err := a.Client.MyShipsOrbit(ship)
+	if err != nil {
+		return client.MyShipsOrbit{}, err
+	}
+	fmt.Printf("sleep %d\n", orbit.Error.Data.SecondsToArrival)
+	time.Sleep(time.Duration(orbit.Error.Data.SecondsToArrival) * time.Second)
+	orbit, err = a.Client.MyShipsOrbit(ship)
+	if err != nil {
+		return client.MyShipsOrbit{}, err
+	}
+	return orbit, nil
 }

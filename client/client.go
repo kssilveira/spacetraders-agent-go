@@ -223,6 +223,14 @@ func (c Client) MyShipsBuy(waypoint, shipType string) (Ship, error) {
 	return myShipsBuy.Data.Ship, nil
 }
 
+type MyShipsOrbitErrorData struct {
+	SecondsToArrival int `json:"secondsToArrival"`
+}
+
+type MyShipsOrbitError struct {
+	Data MyShipsOrbitErrorData `json:"data"`
+}
+
 type Nav struct {
 	WaypointSymbol string `json:"waypointSymbol"`
 }
@@ -232,17 +240,18 @@ type ShipOrbit struct {
 }
 
 type MyShipsOrbit struct {
-	Data ShipOrbit `json:"data"`
+	Data  ShipOrbit         `json:"data"`
+	Error MyShipsOrbitError `json:"error"`
 }
 
-func (c Client) MyShipsOrbit(ship string) (ShipOrbit, error) {
-	var myShipsOrbit MyShipsOrbit
-	if err := c.do("my/ships/{{.ship}}/orbit", &myShipsOrbit, Do{Method: "POST", Template: map[string]string{
+func (c Client) MyShipsOrbit(ship string) (MyShipsOrbit, error) {
+	var res MyShipsOrbit
+	if err := c.do("my/ships/{{.ship}}/orbit", &res, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}}); err != nil {
-		return ShipOrbit{}, err
+		return MyShipsOrbit{}, err
 	}
-	return myShipsOrbit.Data, nil
+	return res, nil
 }
 
 type MyShipsDockErrorData struct {

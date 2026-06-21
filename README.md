@@ -16,14 +16,3 @@ curl --request POST \
  --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/negotiate/contract' \
  --header 'Authorization: Bearer '
 ```
-
-```
-curl --request POST \
- --url 'https://api.spacetraders.io/v2/register' \
- --header 'Authorization: Bearer ACCOUNT_TOKEN' \
- --header 'Content-Type: application/json' \
- --data '{
-    "symbol": "",
-    "faction": ""
-   }'
-```

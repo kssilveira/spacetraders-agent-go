@@ -17,44 +17,44 @@ type Client struct {
 	Client       *http.Client
 }
 
-type RegisterData struct {
+type Register struct {
 	Token string `json:"token"`
 }
 
-type Register struct {
-	Data RegisterData `json:"data"`
+type RegisterRes struct {
+	Data Register `json:"data"`
 }
 
-func (c Client) Register(symbol, faction string) (RegisterData, error) {
-	var res Register
+func (c Client) Register(symbol, faction string) (Register, error) {
+	var res RegisterRes
 	if err := c.do("register", &res, Do{IsAccount: true, Method: "POST", Payload: map[string]any{
 		"symbol":  symbol,
 		"faction": faction,
 	}}); err != nil {
-		return RegisterData{}, err
+		return Register{}, err
 	}
 	return res.Data, nil
 }
 
-type MyAgentError struct {
+type AgentError struct {
 	Code int `json:"code"`
 }
 
-type MyAgentData struct {
+type Agent struct {
 	Headquarters string `json:"headquarters"`
 }
 
-type MyAgent struct {
-	Data  MyAgentData  `json:"data"`
-	Error MyAgentError `json:"error"`
+type AgentRes struct {
+	Data  Agent      `json:"data"`
+	Error AgentError `json:"error"`
 }
 
-func (c Client) MyAgent() (MyAgent, error) {
-	var myAgent MyAgent
-	if err := c.do("my/agent", &myAgent, Do{}); err != nil {
-		return MyAgent{}, err
+func (c Client) Agent() (AgentRes, error) {
+	var res AgentRes
+	if err := c.do("my/agent", &res, Do{}); err != nil {
+		return AgentRes{}, err
 	}
-	return myAgent, nil
+	return res, nil
 }
 
 type Waypoint struct {
@@ -77,14 +77,14 @@ type Waypoints struct {
 }
 
 func (c Client) WaypointsWithFilter(waypoint, filter string) ([]Waypoint, error) {
-	var waypoints Waypoints
-	if err := c.do("systems/{{.system}}/waypoints?{{.filter}}", &waypoints, Do{Template: map[string]string{
+	var res Waypoints
+	if err := c.do("systems/{{.system}}/waypoints?{{.filter}}", &res, Do{Template: map[string]string{
 		"system": strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"filter": filter,
 	}}); err != nil {
 		return nil, err
 	}
-	return waypoints.Data, nil
+	return res.Data, nil
 }
 
 type ShipyardShip struct {
@@ -95,33 +95,33 @@ type Shipyard struct {
 	Ships []ShipyardShip `json:"ships"`
 }
 
-type WaypointShipyard struct {
+type ShipyardRes struct {
 	Data Shipyard `json:"data"`
 }
 
-func (c Client) WaypointShipyard(waypoint string) (Shipyard, error) {
-	var waypointShipyard WaypointShipyard
-	if err := c.do("systems/{{.system}}/waypoints/{{.waypoint}}/shipyard", &waypointShipyard, Do{Template: map[string]string{
+func (c Client) Shipyard(waypoint string) (Shipyard, error) {
+	var res ShipyardRes
+	if err := c.do("systems/{{.system}}/waypoints/{{.waypoint}}/shipyard", &res, Do{Template: map[string]string{
 		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"waypoint": waypoint,
 	}}); err != nil {
 		return Shipyard{}, err
 	}
-	return waypointShipyard.Data, nil
+	return res.Data, nil
 }
 
-type WaypointMarket struct {
+type MarketRes struct {
 }
 
-func (c Client) WaypointMarket(waypoint string) (WaypointMarket, error) {
-	var waypointMarket WaypointMarket
-	if err := c.do("systems/{{.system}}/waypoints/{{.waypoint}}/market", &waypointMarket, Do{Template: map[string]string{
+func (c Client) Market(waypoint string) (MarketRes, error) {
+	var res MarketRes
+	if err := c.do("systems/{{.system}}/waypoints/{{.waypoint}}/market", &res, Do{Template: map[string]string{
 		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"waypoint": waypoint,
 	}}); err != nil {
-		return WaypointMarket{}, err
+		return MarketRes{}, err
 	}
-	return waypointMarket, nil
+	return res, nil
 }
 
 type Deliver struct {
@@ -141,46 +141,46 @@ type Contract struct {
 	Terms    Terms  `json:"terms"`
 }
 
-type MyContracts struct {
+type ContractsRes struct {
 	Data []Contract `json:"data"`
 }
 
-func (c Client) MyContracts() ([]Contract, error) {
-	var myContracts MyContracts
-	if err := c.do("my/contracts", &myContracts, Do{}); err != nil {
+func (c Client) Contracts() ([]Contract, error) {
+	var res ContractsRes
+	if err := c.do("my/contracts", &res, Do{}); err != nil {
 		return nil, err
 	}
-	return myContracts.Data, nil
+	return res.Data, nil
 }
 
-type MyContractsDeliver struct {
+type DeliverRes struct {
 }
 
-func (c Client) MyContractsDeliver(ID, ship, trade string, units int) (MyContractsDeliver, error) {
-	var myContractsDeliver MyContractsDeliver
-	if err := c.do("my/contracts/{{.id}}/deliver", &myContractsDeliver, Do{Method: "POST", Template: map[string]string{
+func (c Client) Deliver(ID, ship, trade string, units int) (DeliverRes, error) {
+	var res DeliverRes
+	if err := c.do("my/contracts/{{.id}}/deliver", &res, Do{Method: "POST", Template: map[string]string{
 		"id": ID,
 	}, Payload: map[string]any{
 		"shipSymbol":  ship,
 		"tradeSymbol": trade,
 		"units":       units,
 	}}); err != nil {
-		return MyContractsDeliver{}, err
+		return DeliverRes{}, err
 	}
-	return myContractsDeliver, nil
+	return res, nil
 }
 
-type Accept struct {
+type AcceptRes struct {
 }
 
-func (c Client) Accept(id string) (Accept, error) {
-	var accept Accept
-	if err := c.do("my/contracts/{{.id}}/accept", &accept, Do{Method: "POST", Template: map[string]string{
+func (c Client) Accept(id string) (AcceptRes, error) {
+	var res AcceptRes
+	if err := c.do("my/contracts/{{.id}}/accept", &res, Do{Method: "POST", Template: map[string]string{
 		"id": id,
 	}}); err != nil {
-		return Accept{}, err
+		return AcceptRes{}, err
 	}
-	return accept, nil
+	return res, nil
 }
 
 type Registration struct {
@@ -192,127 +192,127 @@ type Ship struct {
 	Registration Registration `json:"registration"`
 }
 
-type MyShips struct {
+type ShipsRes struct {
 	Data []Ship `json:"data"`
 }
 
-func (c Client) MyShips() ([]Ship, error) {
-	var myShips MyShips
-	if err := c.do("my/ships", &myShips, Do{}); err != nil {
+func (c Client) Ships() ([]Ship, error) {
+	var res ShipsRes
+	if err := c.do("my/ships", &res, Do{}); err != nil {
 		return nil, err
 	}
-	return myShips.Data, nil
+	return res.Data, nil
 }
 
-type MyShipsBuyData struct {
+type BuyData struct {
 	Ship Ship `json:"ship"`
 }
 
-type MyShipsBuy struct {
-	Data MyShipsBuyData `json:"data"`
+type BuyRes struct {
+	Data BuyData `json:"data"`
 }
 
-func (c Client) MyShipsBuy(waypoint, shipType string) (Ship, error) {
-	var myShipsBuy MyShipsBuy
-	if err := c.do("my/ships", &myShipsBuy, Do{Method: "POST", Payload: map[string]any{
+func (c Client) Buy(waypoint, shipType string) (Ship, error) {
+	var res BuyRes
+	if err := c.do("my/ships", &res, Do{Method: "POST", Payload: map[string]any{
 		"shipType":       shipType,
 		"waypointSymbol": waypoint,
 	}}); err != nil {
 		return Ship{}, nil
 	}
-	return myShipsBuy.Data.Ship, nil
+	return res.Data.Ship, nil
 }
 
-type MyShipsOrbitErrorData struct {
+type OrbitErrorData struct {
 	SecondsToArrival int `json:"secondsToArrival"`
 }
 
-type MyShipsOrbitError struct {
-	Data MyShipsOrbitErrorData `json:"data"`
+type OrbitError struct {
+	Data OrbitErrorData `json:"data"`
 }
 
 type Nav struct {
 	WaypointSymbol string `json:"waypointSymbol"`
 }
 
-type ShipOrbit struct {
+type Orbit struct {
 	Nav Nav `json:"nav"`
 }
 
-type MyShipsOrbit struct {
-	Data  ShipOrbit         `json:"data"`
-	Error MyShipsOrbitError `json:"error"`
+type OrbitRes struct {
+	Data  Orbit      `json:"data"`
+	Error OrbitError `json:"error"`
 }
 
-func (c Client) MyShipsOrbit(ship string) (MyShipsOrbit, error) {
-	var res MyShipsOrbit
+func (c Client) Orbit(ship string) (OrbitRes, error) {
+	var res OrbitRes
 	if err := c.do("my/ships/{{.ship}}/orbit", &res, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}}); err != nil {
-		return MyShipsOrbit{}, err
+		return OrbitRes{}, err
 	}
 	return res, nil
 }
 
-type MyShipsDockErrorData struct {
+type DockErrorData struct {
 	SecondsToArrival int `json:"secondsToArrival"`
 }
 
-type MyShipsDockError struct {
-	Data MyShipsDockErrorData `json:"data"`
+type DockError struct {
+	Data DockErrorData `json:"data"`
 }
 
-type MyShipsDock struct {
-	Error MyShipsDockError `json:"error"`
+type DockRes struct {
+	Error DockError `json:"error"`
 }
 
-func (c Client) MyShipsDock(ship string) (MyShipsDock, error) {
-	var myShipsDock MyShipsDock
-	if err := c.do("my/ships/{{.ship}}/dock", &myShipsDock, Do{Method: "POST", Template: map[string]string{
+func (c Client) Dock(ship string) (DockRes, error) {
+	var res DockRes
+	if err := c.do("my/ships/{{.ship}}/dock", &res, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}}); err != nil {
-		return MyShipsDock{}, err
+		return DockRes{}, err
 	}
-	return myShipsDock, nil
+	return res, nil
 }
 
-type MyShipsRefuel struct {
+type RefuelRes struct {
 }
 
-func (c Client) MyShipsRefuel(ship string) (MyShipsRefuel, error) {
-	var myShipsRefuel MyShipsRefuel
-	if err := c.do("my/ships/{{.ship}}/refuel", &myShipsRefuel, Do{Method: "POST", Template: map[string]string{
+func (c Client) Refuel(ship string) (RefuelRes, error) {
+	var res RefuelRes
+	if err := c.do("my/ships/{{.ship}}/refuel", &res, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}}); err != nil {
-		return MyShipsRefuel{}, err
+		return RefuelRes{}, err
 	}
-	return myShipsRefuel, nil
+	return res, nil
 }
 
-type MyShipsExtractErrorCooldown struct {
+type ExtractErrorCooldown struct {
 	RemainingSeconds int `json:"remainingSeconds"`
 }
 
-type MyShipsExtractErrorData struct {
-	Cooldown MyShipsExtractErrorCooldown `json:"cooldown"`
+type ExtractErrorData struct {
+	Cooldown ExtractErrorCooldown `json:"cooldown"`
 }
 
-type MyShipsExtractError struct {
-	Data MyShipsExtractErrorData `json:"data"`
+type ExtractError struct {
+	Data ExtractErrorData `json:"data"`
 }
 
-type MyShipsExtract struct {
-	Error MyShipsExtractError `json:"error"`
+type ExtractRes struct {
+	Error ExtractError `json:"error"`
 }
 
-func (c Client) MyShipsExtract(ship string) (MyShipsExtract, error) {
-	var myShipsExtract MyShipsExtract
-	if err := c.do("my/ships/{{.ship}}/extract", &myShipsExtract, Do{Method: "POST", Template: map[string]string{
+func (c Client) Extract(ship string) (ExtractRes, error) {
+	var res ExtractRes
+	if err := c.do("my/ships/{{.ship}}/extract", &res, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}}); err != nil {
-		return MyShipsExtract{}, err
+		return ExtractRes{}, err
 	}
-	return myShipsExtract, nil
+	return res, nil
 }
 
 type Inventory struct {
@@ -326,65 +326,65 @@ type Cargo struct {
 	Inventory []Inventory `json:"inventory"`
 }
 
-type MyShipsCargo struct {
+type CargoRes struct {
 	Data Cargo `json:"data"`
 }
 
-func (c Client) MyShipsCargo(ship string) (Cargo, error) {
-	var myShipsCargo MyShipsCargo
-	if err := c.do("my/ships/{{.ship}}/cargo", &myShipsCargo, Do{Template: map[string]string{
+func (c Client) Cargo(ship string) (Cargo, error) {
+	var res CargoRes
+	if err := c.do("my/ships/{{.ship}}/cargo", &res, Do{Template: map[string]string{
 		"ship": ship,
 	}}); err != nil {
 		return Cargo{}, err
 	}
-	return myShipsCargo.Data, nil
+	return res.Data, nil
 }
 
-type MyShipsNavigate struct {
+type NavigateRes struct {
 }
 
-func (c Client) MyShipsNavigate(ship, symbol string) (MyShipsNavigate, error) {
-	var myShipsNavigate MyShipsNavigate
-	if err := c.do("my/ships/{{.ship}}/navigate", &myShipsNavigate, Do{Method: "POST", Template: map[string]string{
+func (c Client) Navigate(ship, symbol string) (NavigateRes, error) {
+	var res NavigateRes
+	if err := c.do("my/ships/{{.ship}}/navigate", &res, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}, Payload: map[string]any{
 		"waypointSymbol": symbol,
 	}}); err != nil {
-		return MyShipsNavigate{}, err
+		return NavigateRes{}, err
 	}
-	return myShipsNavigate, nil
+	return res, nil
 }
 
-type MyShipsSell struct {
+type SellRes struct {
 }
 
-func (c Client) MyShipsSell(ship, symbol string, units int) (MyShipsSell, error) {
-	var myShipsSell MyShipsSell
-	if err := c.do("my/ships/{{.ship}}/sell", &myShipsSell, Do{Method: "POST", Template: map[string]string{
+func (c Client) Sell(ship, symbol string, units int) (SellRes, error) {
+	var res SellRes
+	if err := c.do("my/ships/{{.ship}}/sell", &res, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}, Payload: map[string]any{
 		"symbol": symbol,
 		"units":  units,
 	}}); err != nil {
-		return MyShipsSell{}, err
+		return SellRes{}, err
 	}
-	return myShipsSell, nil
+	return res, nil
 }
 
-type MyShipsJettison struct {
+type JettisonRes struct {
 }
 
-func (c Client) MyShipsJettison(ship, symbol string, units int) (MyShipsJettison, error) {
-	var myShipsJettison MyShipsJettison
-	if err := c.do("my/ships/{{.ship}}/jettison", &myShipsJettison, Do{Method: "POST", Template: map[string]string{
+func (c Client) Jettison(ship, symbol string, units int) (JettisonRes, error) {
+	var res JettisonRes
+	if err := c.do("my/ships/{{.ship}}/jettison", &res, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}, Payload: map[string]any{
 		"symbol": symbol,
 		"units":  units,
 	}}); err != nil {
-		return MyShipsJettison{}, err
+		return JettisonRes{}, err
 	}
-	return myShipsJettison, nil
+	return res, nil
 }
 
 type Do struct {

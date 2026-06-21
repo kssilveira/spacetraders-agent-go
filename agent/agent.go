@@ -99,7 +99,7 @@ func (a *Agent) All() error {
 }
 
 func (a *Agent) getHeadquarters() (string, error) {
-	agent, err := a.Client.MyAgent()
+	agent, err := a.Client.Agent()
 	if err != nil {
 		return "", err
 	}
@@ -112,7 +112,7 @@ func (a *Agent) getHeadquarters() (string, error) {
 			return "", err
 		}
 		a.Client.AgentToken = register.Token
-		agent, err = a.Client.MyAgent()
+		agent, err = a.Client.Agent()
 		if err != nil {
 			return "", err
 		}
@@ -127,7 +127,7 @@ func (a *Agent) getHeadquarters() (string, error) {
 }
 
 func (a *Agent) acceptContract() (string, map[string]client.Deliver, error) {
-	contracts, err := a.Client.MyContracts()
+	contracts, err := a.Client.Contracts()
 	if err != nil {
 		return "", nil, err
 	}
@@ -158,7 +158,7 @@ func (a *Agent) maybeBuyShip(headquarters string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	refuel, err := a.Client.MyShipsRefuel(ship)
+	refuel, err := a.Client.Refuel(ship)
 	if err != nil {
 		return "", err
 	}
@@ -167,7 +167,7 @@ func (a *Agent) maybeBuyShip(headquarters string) (string, error) {
 }
 
 func (a *Agent) excavator() (string, error) {
-	ships, err := a.Client.MyShips()
+	ships, err := a.Client.Ships()
 	if err != nil {
 		return "", err
 	}
@@ -186,7 +186,7 @@ func (a *Agent) doBuyShip(headquarters string) (string, error) {
 		return "", err
 	}
 	for _, shipyardWaypoint := range shipyardWaypoints {
-		shipyard, err := a.Client.WaypointShipyard(shipyardWaypoint.Symbol)
+		shipyard, err := a.Client.Shipyard(shipyardWaypoint.Symbol)
 		if err != nil {
 			return "", err
 		}
@@ -194,7 +194,7 @@ func (a *Agent) doBuyShip(headquarters string) (string, error) {
 			if ship.Type != "SHIP_MINING_DRONE" {
 				continue
 			}
-			got, err := a.Client.MyShipsBuy(shipyardWaypoint.Symbol, "SHIP_MINING_DRONE")
+			got, err := a.Client.Buy(shipyardWaypoint.Symbol, "SHIP_MINING_DRONE")
 			if err != nil {
 				return "", err
 			}
@@ -215,7 +215,7 @@ func (a *Agent) navigateAndExtract(headquarters, ship string, symbolToDeliver ma
 	}
 	asteroid := asteroidWaypoints[0].Symbol
 	if orbit.Data.Nav.WaypointSymbol != asteroid {
-		navigate, err := a.Client.MyShipsNavigate(ship, asteroid)
+		navigate, err := a.Client.Navigate(ship, asteroid)
 		if err != nil {
 			return err
 		}
@@ -224,12 +224,12 @@ func (a *Agent) navigateAndExtract(headquarters, ship string, symbolToDeliver ma
 	if err := a.dock(ship); err != nil {
 		return err
 	}
-	refuel, err := a.Client.MyShipsRefuel(ship)
+	refuel, err := a.Client.Refuel(ship)
 	if err != nil {
 		return err
 	}
 	fmt.Printf("%#v\n", refuel)
-	market, err := a.Client.WaypointMarket(orbit.Data.Nav.WaypointSymbol)
+	market, err := a.Client.Market(orbit.Data.Nav.WaypointSymbol)
 	if err != nil {
 		return err
 	}
@@ -257,13 +257,13 @@ func (a *Agent) extract(ship string, symbolToDeliver map[string]client.Deliver) 
 		}
 		if !isOrbit {
 			isOrbit = true
-			orbit, err := a.Client.MyShipsOrbit(ship)
+			orbit, err := a.Client.Orbit(ship)
 			if err != nil {
 				return err
 			}
 			fmt.Printf("%#v\n", orbit)
 		}
-		extract, err := a.Client.MyShipsExtract(ship)
+		extract, err := a.Client.Extract(ship)
 		if err != nil {
 			return err
 		}
@@ -274,7 +274,7 @@ func (a *Agent) extract(ship string, symbolToDeliver map[string]client.Deliver) 
 }
 
 func (a *Agent) sell(ship string, symbolToDeliver map[string]client.Deliver, isOrbit bool) (bool, error) {
-	cargo, err := a.Client.MyShipsCargo(ship)
+	cargo, err := a.Client.Cargo(ship)
 	if err != nil {
 		return false, err
 	}
@@ -284,18 +284,18 @@ func (a *Agent) sell(ship string, symbolToDeliver map[string]client.Deliver, isO
 		}
 		if isOrbit {
 			isOrbit = false
-			dock, err := a.Client.MyShipsDock(ship)
+			dock, err := a.Client.Dock(ship)
 			if err != nil {
 				return false, err
 			}
 			fmt.Printf("%#v\n", dock)
 		}
-		sell, err := a.Client.MyShipsSell(ship, item.Symbol, item.Units)
+		sell, err := a.Client.Sell(ship, item.Symbol, item.Units)
 		if err != nil {
 			return false, err
 		}
 		fmt.Printf("%#v\n", sell)
-		jettison, err := a.Client.MyShipsJettison(ship, item.Symbol, item.Units)
+		jettison, err := a.Client.Jettison(ship, item.Symbol, item.Units)
 		if err != nil {
 			return false, err
 		}
@@ -305,7 +305,7 @@ func (a *Agent) sell(ship string, symbolToDeliver map[string]client.Deliver, isO
 }
 
 func (a *Agent) isDone(ship string) (bool, int, error) {
-	cargo, err := a.Client.MyShipsCargo(ship)
+	cargo, err := a.Client.Cargo(ship)
 	if err != nil {
 		return false, 0, err
 	}
@@ -317,12 +317,12 @@ func (a *Agent) isDone(ship string) (bool, int, error) {
 
 func (a *Agent) deliver(contractID, ship string, units int, symbolToDeliver map[string]client.Deliver) error {
 	for trade, deliver := range symbolToDeliver {
-		orbit, err := a.Client.MyShipsOrbit(ship)
+		orbit, err := a.Client.Orbit(ship)
 		if err != nil {
 			return err
 		}
 		if orbit.Data.Nav.WaypointSymbol != deliver.DestinationSymbol {
-			navigate, err := a.Client.MyShipsNavigate(ship, deliver.DestinationSymbol)
+			navigate, err := a.Client.Navigate(ship, deliver.DestinationSymbol)
 			if err != nil {
 				return err
 			}
@@ -331,7 +331,7 @@ func (a *Agent) deliver(contractID, ship string, units int, symbolToDeliver map[
 		if err := a.dock(ship); err != nil {
 			return err
 		}
-		deliver, err := a.Client.MyContractsDeliver(contractID, ship, trade, units)
+		deliver, err := a.Client.Deliver(contractID, ship, trade, units)
 		if err != nil {
 			return err
 		}
@@ -341,13 +341,13 @@ func (a *Agent) deliver(contractID, ship string, units int, symbolToDeliver map[
 }
 
 func (a *Agent) dock(ship string) error {
-	dock, err := a.Client.MyShipsDock(ship)
+	dock, err := a.Client.Dock(ship)
 	if err != nil {
 		return err
 	}
 	fmt.Printf("sleep %d\n", dock.Error.Data.SecondsToArrival)
 	time.Sleep(time.Duration(dock.Error.Data.SecondsToArrival) * time.Second)
-	dock, err = a.Client.MyShipsDock(ship)
+	dock, err = a.Client.Dock(ship)
 	if err != nil {
 		return err
 	}
@@ -355,16 +355,16 @@ func (a *Agent) dock(ship string) error {
 	return nil
 }
 
-func (a *Agent) orbit(ship string) (client.MyShipsOrbit, error) {
-	orbit, err := a.Client.MyShipsOrbit(ship)
+func (a *Agent) orbit(ship string) (client.OrbitRes, error) {
+	orbit, err := a.Client.Orbit(ship)
 	if err != nil {
-		return client.MyShipsOrbit{}, err
+		return client.OrbitRes{}, err
 	}
 	fmt.Printf("sleep %d\n", orbit.Error.Data.SecondsToArrival)
 	time.Sleep(time.Duration(orbit.Error.Data.SecondsToArrival) * time.Second)
-	orbit, err = a.Client.MyShipsOrbit(ship)
+	orbit, err = a.Client.Orbit(ship)
 	if err != nil {
-		return client.MyShipsOrbit{}, err
+		return client.OrbitRes{}, err
 	}
 	return orbit, nil
 }

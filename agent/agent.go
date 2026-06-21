@@ -91,6 +91,11 @@ func (a *Agent) getHeadquarters() (string, error) {
 		return "", err
 	}
 	fmt.Printf("%#v\n", waypoint)
+	market, err := a.Client.Market(headquarters)
+	if err != nil {
+		return "", err
+	}
+	fmt.Printf("%#v\n", market)
 	return headquarters, nil
 }
 

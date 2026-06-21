@@ -226,8 +226,10 @@ func (a *Agent) extract(ship string, symbolToDeliver map[string]client.Deliver) 
 		if err != nil {
 			return err
 		}
-		fmt.Printf("sleep %d\n", extract.Error.Data.Cooldown.RemainingSeconds)
-		time.Sleep(time.Duration(extract.Error.Data.Cooldown.RemainingSeconds) * time.Second)
+		if extract.Error.Data.Cooldown.RemainingSeconds != 0 {
+			fmt.Printf("sleep %d\n", extract.Error.Data.Cooldown.RemainingSeconds)
+			time.Sleep(time.Duration(extract.Error.Data.Cooldown.RemainingSeconds) * time.Second)
+		}
 	}
 	return nil
 }
@@ -304,13 +306,15 @@ func (a *Agent) dock(ship string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("sleep %d\n", dock.Error.Data.SecondsToArrival)
-	time.Sleep(time.Duration(dock.Error.Data.SecondsToArrival) * time.Second)
-	dock, err = a.Client.Dock(ship)
-	if err != nil {
-		return err
+	if dock.Error.Data.SecondsToArrival != 0 {
+		fmt.Printf("sleep %d\n", dock.Error.Data.SecondsToArrival)
+		time.Sleep(time.Duration(dock.Error.Data.SecondsToArrival) * time.Second)
+		dock, err = a.Client.Dock(ship)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%#v\n", dock)
 	}
-	fmt.Printf("%#v\n", dock)
 	return nil
 }
 
@@ -319,11 +323,13 @@ func (a *Agent) orbit(ship string) (client.OrbitRes, error) {
 	if err != nil {
 		return client.OrbitRes{}, err
 	}
-	fmt.Printf("sleep %d\n", orbit.Error.Data.SecondsToArrival)
-	time.Sleep(time.Duration(orbit.Error.Data.SecondsToArrival) * time.Second)
-	orbit, err = a.Client.Orbit(ship)
-	if err != nil {
-		return client.OrbitRes{}, err
+	if orbit.Error.Data.SecondsToArrival != 0 {
+		fmt.Printf("sleep %d\n", orbit.Error.Data.SecondsToArrival)
+		time.Sleep(time.Duration(orbit.Error.Data.SecondsToArrival) * time.Second)
+		orbit, err = a.Client.Orbit(ship)
+		if err != nil {
+			return client.OrbitRes{}, err
+		}
 	}
 	return orbit, nil
 }

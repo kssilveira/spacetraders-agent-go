@@ -90,8 +90,7 @@ func (a *Agent) getHeadquarters() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("%#v\n", waypoint)
-	market, err := a.Client.Market(headquarters)
+	market, err := a.Client.Market(waypoint.Symbol)
 	if err != nil {
 		return "", err
 	}

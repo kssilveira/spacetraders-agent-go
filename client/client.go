@@ -61,23 +61,27 @@ type Waypoint struct {
 	Symbol string `json:"symbol"`
 }
 
+type WaypointRes struct {
+	Data Waypoint `json:"data"`
+}
+
 func (c Client) Waypoint(waypoint string) (Waypoint, error) {
-	var res Waypoint
+	var res WaypointRes
 	if err := c.do("systems/{{.system}}/waypoints/{{.waypoint}}", &res, Do{Template: map[string]string{
 		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"waypoint": waypoint,
 	}}); err != nil {
 		return Waypoint{}, err
 	}
-	return res, nil
+	return res.Data, nil
 }
 
-type Waypoints struct {
+type WaypointsRes struct {
 	Data []Waypoint `json:"data"`
 }
 
 func (c Client) WaypointsWithFilter(waypoint, filter string) ([]Waypoint, error) {
-	var res Waypoints
+	var res WaypointsRes
 	if err := c.do("systems/{{.system}}/waypoints?{{.filter}}", &res, Do{Template: map[string]string{
 		"system": strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"filter": filter,

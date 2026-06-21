@@ -6,6 +6,7 @@ import (
 
 	"github.com/kssilveira/spacetraders-agent-go/agent"
 	"github.com/kssilveira/spacetraders-agent-go/client"
+	"github.com/kssilveira/spacetraders-agent-go/token"
 )
 
 func main() {
@@ -15,11 +16,11 @@ func main() {
 }
 
 func all() error {
-	accountToken, err := agent.GetAccountToken()
+	accountToken, err := token.GetAccountToken()
 	if err != nil {
 		return err
 	}
-	agentToken, err := agent.GetAgentToken()
+	agentToken, err := token.GetAgentToken()
 	if err != nil {
 		return err
 	}

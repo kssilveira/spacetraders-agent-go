@@ -2,52 +2,11 @@ package agent
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/kssilveira/spacetraders-agent-go/client"
+	"github.com/kssilveira/spacetraders-agent-go/token"
 )
-
-func GetAccountToken() (string, error) {
-	return getToken("account")
-}
-
-func GetAgentToken() (string, error) {
-	return getToken("agent")
-}
-
-func getToken(name string) (string, error) {
-	tokenPath, err := tokenPath(name)
-	if err != nil {
-		return "", err
-	}
-	tokenBytes, err := os.ReadFile(tokenPath)
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(string(tokenBytes)), nil
-}
-
-func tokenPath(name string) (string, error) {
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(homeDir, ".spacetraders_"+name), nil
-}
-
-func setAgentToken(token string) error {
-	tokenPath, err := tokenPath("agent")
-	if err != nil {
-		return err
-	}
-	if err := os.WriteFile(tokenPath, []byte(token), 0644); err != nil {
-		return err
-	}
-	return nil
-}
 
 type Agent struct {
 	Client client.Client
@@ -108,7 +67,7 @@ func (a *Agent) getHeadquarters() (string, error) {
 		if err != nil {
 			return "", err
 		}
-		if err := setAgentToken(register.Token); err != nil {
+		if err := token.SetAgentToken(register.Token); err != nil {
 			return "", err
 		}
 		a.Client.AgentToken = register.Token

@@ -78,6 +78,18 @@ func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 	}
 	for i, waypoint := range res {
 		waypoint.Distance = int(math.Hypot(float64(hqWaypoint.X-waypoint.X), float64(hqWaypoint.Y-waypoint.Y)))
+		for _, trait := range waypoint.Traits {
+			if trait.Symbol == "MARKETPLACE" {
+				market, err := a.Client.Market(waypoint.Symbol)
+				if err != nil {
+					return nil, err
+				}
+				waypoint.HasMarketplace = true
+				waypoint.Exports = market.Exports
+				waypoint.Imports = market.Imports
+				waypoint.Exchange = market.Exchange
+			}
+		}
 		res[i] = waypoint
 	}
 	slices.SortFunc(res, func(a, b client.Waypoint) int {
@@ -85,17 +97,40 @@ func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 	})
 	fmt.Printf("%-*s %-*s %4s %4s %3s traits\n", len("X1-UN88-EE5F"), "symbol", len("ENGINEERED_ASTEROID"), "type", "x", "y", "d")
 	for _, waypoint := range res {
-		traits := []string{}
-		for _, trait := range waypoint.Traits {
-			if _, ok := interestingTrait[trait.Symbol]; !ok {
+		fmt.Printf("%-*s %-*s %4d %4d %3d %s\n", len("X1-UN88-EE5F"), waypoint.Symbol, len("ENGINEERED_ASTEROID"), waypoint.Type, waypoint.X, waypoint.Y, waypoint.Distance, symbolsFromTraits(waypoint.Traits, interestingTrait))
+		for _, list := range []string{symbolsFromItems("exports", waypoint.Exports), symbolsFromItems("imports", waypoint.Imports), symbolsFromItems("exchange", waypoint.Exchange)} {
+			if list == "" {
 				continue
 			}
-			traits = append(traits, trait.Symbol)
+			fmt.Printf("  %s\n", list)
 		}
-		fmt.Printf("%-*s %-*s %4d %4d %3d %s\n", len("X1-UN88-EE5F"), waypoint.Symbol, len("ENGINEERED_ASTEROID"), waypoint.Type, waypoint.X, waypoint.Y, waypoint.Distance, strings.Join(traits, ", "))
 	}
 	fmt.Printf("%-*s %-*s %4s %4s %3s traits\n", len("X1-UN88-EE5F"), "symbol", len("ENGINEERED_ASTEROID"), "type", "x", "y", "d")
 	return res, nil
+}
+
+func symbolsFromTraits(items []client.Trait, interesting map[string]any) string {
+	res := []string{}
+	for _, item := range items {
+		if interesting != nil {
+			if _, ok := interesting[item.Symbol]; !ok {
+				continue
+			}
+		}
+		res = append(res, item.Symbol)
+	}
+	return strings.Join(res, ", ")
+}
+
+func symbolsFromItems(name string, items []client.Item) string {
+	res := []string{}
+	for _, item := range items {
+		res = append(res, item.Symbol)
+	}
+	if len(res) == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%-*s: %s", len("exchange"), name, strings.Join(res, ", "))
 }
 
 func (a *Agent) fulfillContracts(headquarters string) error {

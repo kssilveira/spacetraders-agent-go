@@ -63,12 +63,16 @@ type Trait struct {
 }
 
 type Waypoint struct {
-	Symbol   string `json:"symbol"`
-	Type     string `json:"type"`
-	X        int    `json:"x"`
-	Y        int    `json:"y"`
-	Distance int
-	Traits   []Trait `json:"traits"`
+	Symbol         string `json:"symbol"`
+	Type           string `json:"type"`
+	X              int    `json:"x"`
+	Y              int    `json:"y"`
+	Distance       int
+	Traits         []Trait `json:"traits"`
+	HasMarketplace bool
+	Exports        []Item
+	Imports        []Item
+	Exchange       []Item
 }
 
 type WaypointRes struct {
@@ -129,18 +133,29 @@ func (c Client) Shipyard(waypoint string) (Shipyard, error) {
 	return res.Data, nil
 }
 
-type MarketRes struct {
+type Item struct {
+	Symbol string `json:"symbol"`
 }
 
-func (c Client) Market(waypoint string) (MarketRes, error) {
+type Market struct {
+	Exports  []Item `json:"exports"`
+	Imports  []Item `json:"imports"`
+	Exchange []Item `json:"exchange"`
+}
+
+type MarketRes struct {
+	Data Market `json:"data"`
+}
+
+func (c Client) Market(waypoint string) (Market, error) {
 	var res MarketRes
 	if err := c.do("systems/{{.system}}/waypoints/{{.waypoint}}/market", &res, Do{Template: map[string]string{
 		"system":   strings.Join(strings.Split(waypoint, "-")[:2], "-"),
 		"waypoint": waypoint,
 	}}); err != nil {
-		return MarketRes{}, err
+		return Market{}, err
 	}
-	return res, nil
+	return res.Data, nil
 }
 
 type Deliver struct {

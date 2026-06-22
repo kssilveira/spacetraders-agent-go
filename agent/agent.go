@@ -29,21 +29,32 @@ func (a *Agent) Run(args []string) error {
 	if err != nil {
 		return err
 	}
+	waypoints, err := a.waypoints(headquarters)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%d\n", len(waypoints))
+	return nil
+}
+
+func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 	page := 1
+	res := []client.Waypoint{}
 	for {
 		waypoints, err := a.Client.Waypoints(headquarters, fmt.Sprintf("page=%d", page))
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if len(waypoints) == 0 {
 			break
 		}
-		for _, waypoint := range waypoints {
-			fmt.Printf("%s %s %d %d\n", waypoint.Symbol, waypoint.Type, waypoint.X, waypoint.Y)
-		}
+		res = append(res, waypoints...)
 		page++
 	}
-	return nil
+	for _, waypoint := range res {
+		fmt.Printf("%-*s %-*s %4d %4d\n", len("X1-UN88-EE5F"), waypoint.Symbol, len("ENGINEERED_ASTEROID"), waypoint.Type, waypoint.X, waypoint.Y)
+	}
+	return res, nil
 }
 
 func (a *Agent) fulfillContracts() error {

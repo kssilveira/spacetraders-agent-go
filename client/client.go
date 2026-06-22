@@ -60,6 +60,9 @@ func (c Client) Agent() (AgentRes, error) {
 
 type Waypoint struct {
 	Symbol string `json:"symbol"`
+	Type   string `json:"type"`
+	X      int    `json:"x"`
+	Y      int    `json:"y"`
 }
 
 type WaypointRes struct {
@@ -81,11 +84,16 @@ type WaypointsRes struct {
 	Data []Waypoint `json:"data"`
 }
 
-func (c Client) WaypointsWithFilter(waypoint, filter string) ([]Waypoint, error) {
+func (c Client) Waypoints(waypoint, filter string) ([]Waypoint, error) {
 	var res WaypointsRes
-	if err := c.do("systems/{{.system}}/waypoints?{{.filter}}", &res, Do{Template: map[string]string{
-		"system": strings.Join(strings.Split(waypoint, "-")[:2], "-"),
-		"filter": filter,
+	separator := ""
+	if filter != "" {
+		separator = "?"
+	}
+	if err := c.do("systems/{{.system}}/waypoints{{.separator}}{{.filter}}", &res, Do{Template: map[string]string{
+		"system":    strings.Join(strings.Split(waypoint, "-")[:2], "-"),
+		"separator": separator,
+		"filter":    filter,
 	}}); err != nil {
 		return nil, err
 	}

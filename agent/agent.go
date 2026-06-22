@@ -25,7 +25,17 @@ func (a *Agent) Run(args []string) error {
 	if len(args) == 1 {
 		return a.fulfillContracts()
 	}
-	fmt.Printf("%#v\n", args)
+	headquarters, err := a.getHeadquarters()
+	if err != nil {
+		return err
+	}
+	waypoints, err := a.Client.Waypoints(headquarters, "")
+	if err != nil {
+		return err
+	}
+	for _, waypoint := range waypoints {
+		fmt.Printf("%s %s %d %d\n", waypoint.Symbol, waypoint.Type, waypoint.X, waypoint.Y)
+	}
 	return nil
 }
 
@@ -95,17 +105,7 @@ func (a *Agent) getHeadquarters() (string, error) {
 			return "", err
 		}
 	}
-	headquarters := agent.Data.Headquarters
-	waypoint, err := a.Client.Waypoint(headquarters)
-	if err != nil {
-		return "", err
-	}
-	market, err := a.Client.Market(waypoint.Symbol)
-	if err != nil {
-		return "", err
-	}
-	fmt.Printf("%#v\n", market)
-	return headquarters, nil
+	return agent.Data.Headquarters, nil
 }
 
 func (a *Agent) acceptContract(ship string) (string, map[string]client.Deliver, error) {
@@ -183,7 +183,7 @@ func (a *Agent) excavator() (string, error) {
 }
 
 func (a *Agent) doBuyShip(headquarters string) (string, error) {
-	shipyardWaypoints, err := a.Client.WaypointsWithFilter(headquarters, "traits=SHIPYARD")
+	shipyardWaypoints, err := a.Client.Waypoints(headquarters, "traits=SHIPYARD")
 	if err != nil {
 		return "", err
 	}
@@ -211,7 +211,7 @@ func (a *Agent) navigateAndExtract(headquarters, ship string, symbolToDeliver ma
 	if err != nil {
 		return err
 	}
-	asteroidWaypoints, err := a.Client.WaypointsWithFilter(headquarters, "type=ENGINEERED_ASTEROID")
+	asteroidWaypoints, err := a.Client.Waypoints(headquarters, "type=ENGINEERED_ASTEROID")
 	if err != nil {
 		return err
 	}

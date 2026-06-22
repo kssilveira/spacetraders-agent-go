@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/kssilveira/spacetraders-agent-go/agent"
 	"github.com/kssilveira/spacetraders-agent-go/client"
@@ -25,5 +26,5 @@ func all() error {
 		return err
 	}
 	agent := agent.Agent{Client: client.Client{AccountToken: accountToken, AgentToken: agentToken, Client: &http.Client{}}}
-	return agent.All()
+	return agent.Run(os.Args)
 }

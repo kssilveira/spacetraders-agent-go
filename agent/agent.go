@@ -21,7 +21,15 @@ type Agent struct {
 	State  State
 }
 
-func (a *Agent) All() error {
+func (a *Agent) Run(args []string) error {
+	if len(args) == 1 {
+		return a.fulfillContracts()
+	}
+	fmt.Printf("%#v\n", args)
+	return nil
+}
+
+func (a *Agent) fulfillContracts() error {
 	headquarters, err := a.getHeadquarters()
 	if err != nil {
 		return err

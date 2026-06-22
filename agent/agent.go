@@ -26,12 +26,12 @@ type Agent struct {
 }
 
 func (a *Agent) Run(args []string) error {
-	if len(args) == 1 {
-		return a.fulfillContracts()
-	}
 	headquarters, err := a.getHeadquarters()
 	if err != nil {
 		return err
+	}
+	if len(args) == 1 {
+		return a.fulfillContracts(headquarters)
 	}
 	waypoints, err := a.waypoints(headquarters)
 	if err != nil {
@@ -98,11 +98,7 @@ func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 	return res, nil
 }
 
-func (a *Agent) fulfillContracts() error {
-	headquarters, err := a.getHeadquarters()
-	if err != nil {
-		return err
-	}
+func (a *Agent) fulfillContracts(headquarters string) error {
 	ship, err := a.maybeBuyShip(headquarters)
 	if err != nil {
 		return err

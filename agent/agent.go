@@ -30,7 +30,7 @@ func (a *Agent) All() error {
 		return err
 	}
 	for {
-		contractID, symbolToDeliver, err := a.acceptContract()
+		contractID, symbolToDeliver, err := a.acceptContract(ship)
 		if err != nil {
 			return err
 		}
@@ -98,24 +98,44 @@ func (a *Agent) getHeadquarters() (string, error) {
 	return headquarters, nil
 }
 
-func (a *Agent) acceptContract() (string, map[string]client.Deliver, error) {
+func (a *Agent) acceptContract(ship string) (string, map[string]client.Deliver, error) {
 	contracts, err := a.Client.Contracts()
 	if err != nil {
 		return "", nil, err
 	}
-	contract := contracts[0]
-	if !contract.Accepted {
-		accepted, err := a.Client.Accept(contract.ID)
-		if err != nil {
-			return "", nil, err
+	for _, contract := range contracts {
+		if !contract.Accepted {
+			accepted, err := a.Client.Accept(contract.ID)
+			if err != nil {
+				return "", nil, err
+			}
+			fmt.Printf("%#v\n", accepted)
 		}
-		fmt.Printf("%#v\n", accepted)
+		if !contract.Fulfilled {
+			res := map[string]client.Deliver{}
+			found := false
+			for _, deliver := range contract.Terms.Deliver {
+				res[deliver.TradeSymbol] = deliver
+				if deliver.UnitsFulfilled < deliver.UnitsRequired {
+					found = true
+				}
+			}
+			if found {
+				return contract.ID, res, nil
+			}
+			fulfilled, err := a.Client.Fulfill(contract.ID)
+			if err != nil {
+				return "", nil, err
+			}
+			fmt.Printf("%#v\n", fulfilled)
+		}
 	}
-	res := map[string]client.Deliver{}
-	for _, deliver := range contract.Terms.Deliver {
-		res[deliver.TradeSymbol] = deliver
+	negotiated, err := a.Client.Negotiate(ship)
+	if err != nil {
+		return "", nil, err
 	}
-	return contract.ID, res, nil
+	fmt.Printf("%#v\n", negotiated)
+	return a.acceptContract(ship)
 }
 
 func (a *Agent) maybeBuyShip(headquarters string) (string, error) {

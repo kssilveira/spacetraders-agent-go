@@ -140,9 +140,10 @@ type Terms struct {
 }
 
 type Contract struct {
-	ID       string `json:"id"`
-	Accepted bool   `json:"accepted"`
-	Terms    Terms  `json:"terms"`
+	ID        string `json:"id"`
+	Accepted  bool   `json:"accepted"`
+	Fulfilled bool   `json:"fulfilled"`
+	Terms     Terms  `json:"terms"`
 }
 
 type ContractsRes struct {
@@ -187,6 +188,19 @@ func (c Client) Accept(id string) (AcceptRes, error) {
 	return res, nil
 }
 
+type FulfillRes struct {
+}
+
+func (c Client) Fulfill(id string) (FulfillRes, error) {
+	var res FulfillRes
+	if err := c.do("my/contracts/{{.id}}/fulfill", &res, Do{Method: "POST", Template: map[string]string{
+		"id": id,
+	}}); err != nil {
+		return FulfillRes{}, err
+	}
+	return res, nil
+}
+
 type Registration struct {
 	Role string `json:"role"`
 }
@@ -225,6 +239,19 @@ func (c Client) Buy(waypoint, shipType string) (Ship, error) {
 		return Ship{}, nil
 	}
 	return res.Data.Ship, nil
+}
+
+type NegotiateRes struct {
+}
+
+func (c Client) Negotiate(ship string) (NegotiateRes, error) {
+	var res NegotiateRes
+	if err := c.do("my/ships/{{.ship}}/negotiate/contract", &res, Do{Method: "POST", Template: map[string]string{
+		"ship": ship,
+	}}); err != nil {
+		return NegotiateRes{}, err
+	}
+	return res, nil
 }
 
 type OrbitErrorData struct {

@@ -29,12 +29,19 @@ func (a *Agent) Run(args []string) error {
 	if err != nil {
 		return err
 	}
-	waypoints, err := a.Client.Waypoints(headquarters, "")
-	if err != nil {
-		return err
-	}
-	for _, waypoint := range waypoints {
-		fmt.Printf("%s %s %d %d\n", waypoint.Symbol, waypoint.Type, waypoint.X, waypoint.Y)
+	page := 1
+	for {
+		waypoints, err := a.Client.Waypoints(headquarters, fmt.Sprintf("page=%d", page))
+		if err != nil {
+			return err
+		}
+		if len(waypoints) == 0 {
+			break
+		}
+		for _, waypoint := range waypoints {
+			fmt.Printf("%s %s %d %d\n", waypoint.Symbol, waypoint.Type, waypoint.X, waypoint.Y)
+		}
+		page++
 	}
 	return nil
 }

@@ -3,6 +3,7 @@ package agent
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/kssilveira/spacetraders-agent-go/client"
@@ -40,6 +41,10 @@ func (a *Agent) Run(args []string) error {
 func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 	page := 1
 	res := []client.Waypoint{}
+	hqWaypoint, err := a.Client.Waypoint(headquarters)
+	if err != nil {
+		return nil, err
+	}
 	for {
 		waypoints, err := a.Client.Waypoints(headquarters, fmt.Sprintf("page=%d", page))
 		if err != nil {
@@ -51,9 +56,12 @@ func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 		res = append(res, waypoints...)
 		page++
 	}
+	fmt.Printf("%-*s %-*s %4s %4s %3s\n", len("X1-UN88-EE5F"), "symbol", len("ENGINEERED_ASTEROID"), "type", "x", "y", "d")
 	for _, waypoint := range res {
-		fmt.Printf("%-*s %-*s %4d %4d\n", len("X1-UN88-EE5F"), waypoint.Symbol, len("ENGINEERED_ASTEROID"), waypoint.Type, waypoint.X, waypoint.Y)
+		distance := math.Hypot(float64(hqWaypoint.X-waypoint.X), float64(hqWaypoint.Y-waypoint.Y))
+		fmt.Printf("%-*s %-*s %4d %4d %3.0f\n", len("X1-UN88-EE5F"), waypoint.Symbol, len("ENGINEERED_ASTEROID"), waypoint.Type, waypoint.X, waypoint.Y, distance)
 	}
+	fmt.Printf("%-*s %-*s %4s %4s %3s\n", len("X1-UN88-EE5F"), "symbol", len("ENGINEERED_ASTEROID"), "type", "x", "y", "d")
 	return res, nil
 }
 

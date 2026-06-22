@@ -433,6 +433,21 @@ func (c Client) Jettison(ship, symbol string, units int) (JettisonRes, error) {
 	return res, nil
 }
 
+type RefineRes struct {
+}
+
+func (c Client) Refine(ship, produce string) (RefineRes, error) {
+	var res RefineRes
+	if err := c.do("my/ships/{{.ship}}/refine", &res, Do{Method: "POST", Template: map[string]string{
+		"ship": ship,
+	}, Payload: map[string]any{
+		"produce": produce,
+	}}); err != nil {
+		return RefineRes{}, err
+	}
+	return res, nil
+}
+
 type Do struct {
 	IsAccount bool
 	Method    string

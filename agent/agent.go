@@ -380,6 +380,16 @@ func (a *Agent) isDone(ship string) (bool, int, error) {
 	}
 	a.State.Capacity = cargo.Capacity
 	if cargo.Units == cargo.Capacity && len(cargo.Inventory) == 1 {
+		have := cargo.Inventory[0].Symbol
+		want := a.State.SymbolToDeliver[have].TradeSymbol
+		if want != have {
+			refine, err := a.Client.Refine(ship, want)
+			if err != nil {
+				return false, 0, err
+			}
+			fmt.Printf("%#v\n", refine)
+			return false, 0, nil
+		}
 		return true, cargo.Units, nil
 	}
 	return false, 0, nil

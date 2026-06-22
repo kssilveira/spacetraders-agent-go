@@ -4,11 +4,10 @@ https://spacetraders.io agent in Go using https://spacetraders.io/openapi.
 
 ## TODO
 
-- get refinery module
-- negotiate non-refined contract
-
 - query markets
 - query shipyards
+- get refinery module
+
 - compare ships
+- survey
 - control multiple ships
-  - survey

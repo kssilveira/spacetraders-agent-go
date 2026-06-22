@@ -433,7 +433,12 @@ func (c Client) Jettison(ship, symbol string, units int) (JettisonRes, error) {
 	return res, nil
 }
 
+type RefineError struct {
+	Code int `json:"code"`
+}
+
 type RefineRes struct {
+	Error RefineError `json:"error"`
 }
 
 func (c Client) Refine(ship, produce string) (RefineRes, error) {

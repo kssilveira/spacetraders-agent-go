@@ -66,7 +66,7 @@ func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 		return nil, err
 	}
 	for {
-		waypoints, err := a.Client.Waypoints(headquarters, fmt.Sprintf("page=%d", page))
+		waypoints, err := a.Client.Waypoints(headquarters, fmt.Sprintf("page=%d&limit=20", page))
 		if err != nil {
 			return nil, err
 		}

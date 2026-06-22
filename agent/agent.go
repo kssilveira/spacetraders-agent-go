@@ -10,6 +10,7 @@ import (
 )
 
 type State struct {
+	Credits         int
 	SymbolToDeliver map[string]client.Deliver
 	SymbolToCargo   map[string]client.Inventory
 	Capacity        int
@@ -71,6 +72,7 @@ func (a *Agent) getHeadquarters() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	a.State.Credits = agent.Data.Credits
 	if agent.Error.Code != 0 {
 		register, err := a.Client.Register("KAUE", "AEGIS")
 		if err != nil {

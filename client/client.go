@@ -42,6 +42,7 @@ type AgentError struct {
 
 type Agent struct {
 	Headquarters string `json:"headquarters"`
+	Credits      int    `json:"credits"`
 }
 
 type AgentRes struct {

@@ -4,13 +4,8 @@ https://spacetraders.io agent in Go using https://spacetraders.io/openapi.
 
 ## TODO
 
-```
-curl --request POST \
- --url 'https://api.spacetraders.io/v2/my/contracts/:contractId/fulfill'
-```
-
-```
-curl --request POST \
- --url 'https://api.spacetraders.io/v2/my/ships/:shipSymbol/negotiate/contract' \
- --header 'Authorization: Bearer '
-```
+- query all waypoints in the system
+  - query waypoint.orbitals
+  - query markets
+- compare ships
+- control multiple ships

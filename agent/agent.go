@@ -89,6 +89,13 @@ func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 				waypoint.Imports = market.Imports
 				waypoint.Exchange = market.Exchange
 			}
+			if trait.Symbol == "SHIPYARD" {
+				shipyard, err := a.Client.Shipyard(waypoint.Symbol)
+				if err != nil {
+					return nil, err
+				}
+				fmt.Printf("%#v\n", shipyard)
+			}
 		}
 		res[i] = waypoint
 	}
@@ -102,7 +109,7 @@ func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 			if list == "" {
 				continue
 			}
-			fmt.Printf("  %s\n", list)
+			fmt.Printf("%s\n", list)
 		}
 	}
 	fmt.Printf("%-*s %-*s %4s %4s %3s traits\n", len("X1-UN88-EE5F"), "symbol", len("ENGINEERED_ASTEROID"), "type", "x", "y", "d")
@@ -130,7 +137,7 @@ func symbolsFromItems(name string, items []client.Item) string {
 	if len(res) == 0 {
 		return ""
 	}
-	return fmt.Sprintf("%-*s: %s", len("exchange"), name, strings.Join(res, ", "))
+	return fmt.Sprintf("%-*s %s", len("X1-UN88-EE5F"), name, strings.Join(res, ", "))
 }
 
 func (a *Agent) fulfillContracts(headquarters string) error {

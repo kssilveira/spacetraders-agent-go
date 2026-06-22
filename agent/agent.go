@@ -115,6 +115,12 @@ func (a *Agent) getHeadquarters() (string, error) {
 	return agent.Data.Headquarters, nil
 }
 
+var (
+	symbolToSource = map[string]string{
+		"IRON": "IRON_ORE",
+	}
+)
+
 func (a *Agent) acceptContract(ship string) (string, map[string]client.Deliver, error) {
 	contracts, err := a.Client.Contracts()
 	if err != nil {
@@ -133,6 +139,9 @@ func (a *Agent) acceptContract(ship string) (string, map[string]client.Deliver, 
 			found := false
 			for _, deliver := range contract.Terms.Deliver {
 				res[deliver.TradeSymbol] = deliver
+				if source, ok := symbolToSource[deliver.TradeSymbol]; ok {
+					res[source] = deliver
+				}
 				if deliver.UnitsFulfilled < deliver.UnitsRequired {
 					found = true
 				}

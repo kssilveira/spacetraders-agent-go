@@ -84,7 +84,6 @@ func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 				if err != nil {
 					return nil, err
 				}
-				waypoint.HasMarketplace = true
 				waypoint.Exports = market.Exports
 				waypoint.Imports = market.Imports
 				waypoint.Exchange = market.Exchange

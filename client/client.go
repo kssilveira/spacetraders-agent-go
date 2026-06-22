@@ -63,16 +63,15 @@ type Trait struct {
 }
 
 type Waypoint struct {
-	Symbol         string `json:"symbol"`
-	Type           string `json:"type"`
-	X              int    `json:"x"`
-	Y              int    `json:"y"`
-	Distance       int
-	Traits         []Trait `json:"traits"`
-	HasMarketplace bool
-	Exports        []Item
-	Imports        []Item
-	Exchange       []Item
+	Symbol   string `json:"symbol"`
+	Type     string `json:"type"`
+	X        int    `json:"x"`
+	Y        int    `json:"y"`
+	Distance int
+	Traits   []Trait `json:"traits"`
+	Exports  []Item
+	Imports  []Item
+	Exchange []Item
 }
 
 type WaypointRes struct {

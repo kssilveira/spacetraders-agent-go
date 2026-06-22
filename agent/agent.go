@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/kssilveira/spacetraders-agent-go/client"
@@ -40,6 +41,23 @@ func (a *Agent) Run(args []string) error {
 	return nil
 }
 
+var (
+	interestingTrait = map[string]any{
+		"MINERAL_DEPOSITS":        nil,
+		"COMMON_METAL_DEPOSITS":   nil,
+		"PRECIOUS_METAL_DEPOSITS": nil,
+		"RARE_METAL_DEPOSITS":     nil,
+		"ICE_CRYSTALS":            nil,
+		"METHANE_POOLS":           nil,
+		"EXPLOSIVE_GASES":         nil,
+		"UNSTABLE_COMPOSITION":    nil,
+		"STRIPPED":                nil,
+		"MARKETPLACE":             nil,
+		"SHIPYARD":                nil,
+		"UNCHARTED":               nil,
+	}
+)
+
 func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 	page := 1
 	res := []client.Waypoint{}
@@ -65,11 +83,18 @@ func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 	slices.SortFunc(res, func(a, b client.Waypoint) int {
 		return cmp.Compare(a.Distance, b.Distance)
 	})
-	fmt.Printf("%-*s %-*s %4s %4s %3s\n", len("X1-UN88-EE5F"), "symbol", len("ENGINEERED_ASTEROID"), "type", "x", "y", "d")
+	fmt.Printf("%-*s %-*s %4s %4s %3s traits\n", len("X1-UN88-EE5F"), "symbol", len("ENGINEERED_ASTEROID"), "type", "x", "y", "d")
 	for _, waypoint := range res {
-		fmt.Printf("%-*s %-*s %4d %4d %3d\n", len("X1-UN88-EE5F"), waypoint.Symbol, len("ENGINEERED_ASTEROID"), waypoint.Type, waypoint.X, waypoint.Y, waypoint.Distance)
+		traits := []string{}
+		for _, trait := range waypoint.Traits {
+			if _, ok := interestingTrait[trait.Symbol]; !ok {
+				continue
+			}
+			traits = append(traits, trait.Symbol)
+		}
+		fmt.Printf("%-*s %-*s %4d %4d %3d %s\n", len("X1-UN88-EE5F"), waypoint.Symbol, len("ENGINEERED_ASTEROID"), waypoint.Type, waypoint.X, waypoint.Y, waypoint.Distance, strings.Join(traits, ", "))
 	}
-	fmt.Printf("%-*s %-*s %4s %4s %3s\n", len("X1-UN88-EE5F"), "symbol", len("ENGINEERED_ASTEROID"), "type", "x", "y", "d")
+	fmt.Printf("%-*s %-*s %4s %4s %3s traits\n", len("X1-UN88-EE5F"), "symbol", len("ENGINEERED_ASTEROID"), "type", "x", "y", "d")
 	return res, nil
 }
 

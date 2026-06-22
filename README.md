@@ -9,3 +9,4 @@ https://spacetraders.io agent in Go using https://spacetraders.io/openapi.
 - query shipyards
 - compare ships
 - control multiple ships
+  - survey

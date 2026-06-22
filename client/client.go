@@ -58,12 +58,17 @@ func (c Client) Agent() (AgentRes, error) {
 	return res, nil
 }
 
+type Trait struct {
+	Symbol string `json:"symbol"`
+}
+
 type Waypoint struct {
 	Symbol   string `json:"symbol"`
 	Type     string `json:"type"`
 	X        int    `json:"x"`
 	Y        int    `json:"y"`
 	Distance int
+	Traits   []Trait `json:"traits"`
 }
 
 type WaypointRes struct {

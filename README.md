@@ -4,8 +4,8 @@ https://spacetraders.io agent in Go using https://spacetraders.io/openapi.
 
 ## TODO
 
-- query all waypoints in the system
-  - query waypoint.orbitals
-  - query markets
+- query waypoint traits
+- query markets
+- query shipyards
 - compare ships
 - control multiple ships

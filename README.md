@@ -4,9 +4,7 @@ https://spacetraders.io agent in Go using https://spacetraders.io/openapi.
 
 ## TODO
 
-- query shipyards
-  - ship types
-  - ships
+- query shipyards ships
 - query my ships
 
 - get refinery module

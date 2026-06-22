@@ -72,6 +72,7 @@ type Waypoint struct {
 	Exports  []Item
 	Imports  []Item
 	Exchange []Item
+	Types    []Type
 }
 
 type WaypointRes struct {
@@ -113,8 +114,13 @@ type ShipyardShip struct {
 	Type string `json:"type"`
 }
 
+type Type struct {
+	Type string `json:"type"`
+}
+
 type Shipyard struct {
-	Ships []ShipyardShip `json:"ships"`
+	Ships     []ShipyardShip `json:"ships"`
+	ShipTypes []Type         `json:"shipTypes"`
 }
 
 type ShipyardRes struct {

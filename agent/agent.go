@@ -93,7 +93,7 @@ func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 				if err != nil {
 					return nil, err
 				}
-				fmt.Printf("%#v\n", shipyard)
+				waypoint.Types = shipyard.ShipTypes
 			}
 		}
 		res[i] = waypoint
@@ -104,7 +104,7 @@ func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 	fmt.Printf("%-*s %-*s %4s %4s %3s traits\n", len("X1-UN88-EE5F"), "symbol", len("ENGINEERED_ASTEROID"), "type", "x", "y", "d")
 	for _, waypoint := range res {
 		fmt.Printf("%-*s %-*s %4d %4d %3d %s\n", len("X1-UN88-EE5F"), waypoint.Symbol, len("ENGINEERED_ASTEROID"), waypoint.Type, waypoint.X, waypoint.Y, waypoint.Distance, symbolsFromTraits(waypoint.Traits, interestingTrait))
-		for _, list := range []string{symbolsFromItems("exports", waypoint.Exports), symbolsFromItems("imports", waypoint.Imports), symbolsFromItems("exchange", waypoint.Exchange)} {
+		for _, list := range []string{symbolsFromItems("exports", waypoint.Exports), symbolsFromItems("imports", waypoint.Imports), symbolsFromItems("exchange", waypoint.Exchange), typesFromTypes("types", waypoint.Types)} {
 			if list == "" {
 				continue
 			}
@@ -132,6 +132,17 @@ func symbolsFromItems(name string, items []client.Item) string {
 	res := []string{}
 	for _, item := range items {
 		res = append(res, item.Symbol)
+	}
+	if len(res) == 0 {
+		return ""
+	}
+	return fmt.Sprintf("%-*s %s", len("X1-UN88-EE5F"), name, strings.Join(res, ", "))
+}
+
+func typesFromTypes(name string, items []client.Type) string {
+	res := []string{}
+	for _, item := range items {
+		res = append(res, item.Type)
 	}
 	if len(res) == 0 {
 		return ""

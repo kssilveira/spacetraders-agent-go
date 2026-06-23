@@ -268,7 +268,13 @@ type Registration struct {
 
 type Ship struct {
 	Symbol       string       `json:"symbol"`
+	Nav          Nav          `json:"nav"`
 	Registration Registration `json:"registration"`
+	Frame        Frame        `json:"frame"`
+	Reactor      Reactor      `json:"reactor"`
+	Engine       Engine       `json:"engine"`
+	Modules      []Module     `json:"modules"`
+	Mounts       []Mount      `json:"mounts"`
 }
 
 type ShipsRes struct {
@@ -325,6 +331,7 @@ type OrbitError struct {
 
 type Nav struct {
 	WaypointSymbol string `json:"waypointSymbol"`
+	Status         string `json:"status"`
 }
 
 type Orbit struct {

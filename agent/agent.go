@@ -40,7 +40,36 @@ func (a *Agent) Run(args []string) error {
 		}
 		fmt.Printf("%d\n", len(waypoints))
 	}
+	if args[2] == "ships" {
+		ships, err := a.ships()
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%d\n", len(ships))
+	}
 	return nil
+}
+
+func (a *Agent) ships() ([]client.Ship, error) {
+	ships, err := a.Client.Ships()
+	if err != nil {
+		return nil, err
+	}
+	res := []string{}
+	for _, ship := range ships {
+		one := []string{ship.Symbol, ship.Registration.Role, ship.Nav.WaypointSymbol, ship.Nav.Status, ship.Frame.Symbol, ship.Reactor.Symbol, ship.Engine.Symbol}
+		for _, module := range ship.Modules {
+			one = append(one, module.Symbol)
+		}
+		for _, mount := range ship.Mounts {
+			one = append(one, mount.Symbol)
+		}
+		res = append(res, strings.Join(one, ", "))
+	}
+	if len(ships) > 0 {
+		fmt.Printf("ships\n  %s\n", strings.Join(res, "\n  "))
+	}
+	return ships, nil
 }
 
 var (

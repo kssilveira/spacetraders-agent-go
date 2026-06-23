@@ -34,9 +34,9 @@ func (a *Agent) Run(args []string) error {
 		return nil
 	}
 	switch args[2] {
-	case "extract":
+	case "contracts":
 		return a.fulfillContracts(headquarters)
-	case "list":
+	case "waypoints":
 		waypoints, err := a.waypoints(headquarters)
 		if err != nil {
 			return err

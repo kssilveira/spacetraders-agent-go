@@ -94,6 +94,7 @@ func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 					return nil, err
 				}
 				waypoint.Types = shipyard.ShipTypes
+				waypoint.Ships = shipyard.Ships
 			}
 		}
 		res[i] = waypoint
@@ -104,7 +105,7 @@ func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
 	fmt.Printf("%-*s %-*s %4s %4s %3s traits\n", len("X1-UN88-EE5F"), "symbol", len("ENGINEERED_ASTEROID"), "type", "x", "y", "d")
 	for _, waypoint := range res {
 		fmt.Printf("%-*s %-*s %4d %4d %3d %s\n", len("X1-UN88-EE5F"), waypoint.Symbol, len("ENGINEERED_ASTEROID"), waypoint.Type, waypoint.X, waypoint.Y, waypoint.Distance, symbolsFromTraits(waypoint.Traits, interestingTrait))
-		for _, list := range []string{symbolsFromItems("exports", waypoint.Exports), symbolsFromItems("imports", waypoint.Imports), symbolsFromItems("exchange", waypoint.Exchange), typesFromTypes("types", waypoint.Types)} {
+		for _, list := range []string{symbolsFromItems("exports", waypoint.Exports), symbolsFromItems("imports", waypoint.Imports), symbolsFromItems("exchange", waypoint.Exchange), typesFromTypes("types", waypoint.Types), symbolsFromShips("ships", waypoint.Ships)} {
 			if list == "" {
 				continue
 			}
@@ -148,6 +149,24 @@ func typesFromTypes(name string, items []client.Type) string {
 		return ""
 	}
 	return fmt.Sprintf("%-*s %s", len("X1-UN88-EE5F"), name, strings.Join(res, ", "))
+}
+
+func symbolsFromShips(name string, ships []client.ShipyardShip) string {
+	if len(ships) == 0 {
+		return ""
+	}
+	res := []string{}
+	for _, ship := range ships {
+		one := []string{ship.Type, ship.Frame.Symbol, ship.Reactor.Symbol, ship.Engine.Symbol}
+		for _, module := range ship.Modules {
+			one = append(one, module.Symbol)
+		}
+		for _, mount := range ship.Mounts {
+			one = append(one, mount.Symbol)
+		}
+		res = append(res, strings.Join(one, ", "))
+	}
+	return fmt.Sprintf("%-*s\n  %s", len("X1-UN88-EE5F"), name, strings.Join(res, "\n  "))
 }
 
 func (a *Agent) fulfillContracts(headquarters string) error {

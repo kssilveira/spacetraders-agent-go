@@ -73,6 +73,7 @@ type Waypoint struct {
 	Imports  []Item
 	Exchange []Item
 	Types    []Type
+	Ships    []ShipyardShip
 }
 
 type WaypointRes struct {
@@ -110,8 +111,33 @@ func (c Client) Waypoints(waypoint, filter string) ([]Waypoint, error) {
 	return res.Data, nil
 }
 
+type Frame struct {
+	Symbol string `json:"symbol"`
+}
+
+type Reactor struct {
+	Symbol string `json:"symbol"`
+}
+
+type Engine struct {
+	Symbol string `json:"symbol"`
+}
+
+type Module struct {
+	Symbol string `json:"symbol"`
+}
+
+type Mount struct {
+	Symbol string `json:"symbol"`
+}
+
 type ShipyardShip struct {
-	Type string `json:"type"`
+	Type    string   `json:"type"`
+	Frame   Frame    `json:"frame"`
+	Reactor Reactor  `json:"reactor"`
+	Engine  Engine   `json:"engine"`
+	Modules []Module `json:"modules"`
+	Mounts  []Mount  `json:"mounts"`
 }
 
 type Type struct {

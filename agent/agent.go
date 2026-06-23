@@ -33,11 +33,13 @@ func (a *Agent) Run(args []string) error {
 	if len(args) == 1 {
 		return a.fulfillContracts(headquarters)
 	}
-	waypoints, err := a.waypoints(headquarters)
-	if err != nil {
-		return err
+	if args[2] == "list" {
+		waypoints, err := a.waypoints(headquarters)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%d\n", len(waypoints))
 	}
-	fmt.Printf("%d\n", len(waypoints))
 	return nil
 }
 

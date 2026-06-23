@@ -30,17 +30,19 @@ func (a *Agent) Run(args []string) error {
 	if err != nil {
 		return err
 	}
-	if len(args) == 1 {
-		return a.fulfillContracts(headquarters)
+	if len(args) < 3 {
+		return nil
 	}
-	if args[2] == "list" {
+	switch args[2] {
+	case "extract":
+		return a.fulfillContracts(headquarters)
+	case "list":
 		waypoints, err := a.waypoints(headquarters)
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%d\n", len(waypoints))
-	}
-	if args[2] == "ships" {
+	case "ships":
 		ships, err := a.ships()
 		if err != nil {
 			return err

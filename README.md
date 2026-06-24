@@ -4,7 +4,7 @@ https://spacetraders.io agent in Go using https://spacetraders.io/openapi.
 
 ## Features
 
-### Fulfill contracts
+### Extract resources to fulfill contracts and sell
 
 ```
 $ go run main.go -- contracts |& tee ~/contracts

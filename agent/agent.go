@@ -373,9 +373,6 @@ func (a *Agent) sell(ship string, isOrbit bool) (bool, error) {
 		if _, err := a.Client.Sell(ship, item.Symbol, item.Units); err != nil {
 			return false, err
 		}
-		if _, err := a.Client.Jettison(ship, item.Symbol, item.Units); err != nil {
-			return false, err
-		}
 	}
 	return isOrbit, nil
 }

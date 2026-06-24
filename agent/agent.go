@@ -375,6 +375,11 @@ func (a *Agent) extract(ship string) error {
 			}
 			fmt.Printf("%#v\n", orbit)
 		}
+		survey, err := a.Client.Survey(ship)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%#v\n", survey)
 		extract, err := a.Client.Extract(ship)
 		if err != nil {
 			return err

@@ -388,6 +388,19 @@ func (c Client) Refuel(ship string) (RefuelRes, error) {
 	return res, nil
 }
 
+type SurveyRes struct {
+}
+
+func (c Client) Survey(ship string) (SurveyRes, error) {
+	var res SurveyRes
+	if err := c.do("my/ships/{{.ship}}/survey", &res, Do{Method: "POST", Template: map[string]string{
+		"ship": ship,
+	}}); err != nil {
+		return SurveyRes{}, err
+	}
+	return res, nil
+}
+
 type ExtractErrorCooldown struct {
 	RemainingSeconds int `json:"remainingSeconds"`
 }

@@ -2,12 +2,10 @@ package agent
 
 import (
 	"cmp"
-	"encoding/json"
 	"fmt"
 	"math"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/kssilveira/spacetraders-agent-go/client"
 	"github.com/kssilveira/spacetraders-agent-go/token"
@@ -373,11 +371,7 @@ func (a *Agent) extract(ship string) error {
 			return err
 		}
 		fmt.Printf("%#v\n", survey)
-		extract, err := a.Client.ExtractWithSurvey(ship, survey.Data.Surveys[0])
-		if err != nil {
-			return err
-		}
-		if err := a.sleep(extract.Error.Data.Cooldown.RemainingSeconds); err != nil {
+		if _, err := a.Client.ExtractWithSurvey(ship, survey.Data.Surveys[0]); err != nil {
 			return err
 		}
 	}
@@ -463,19 +457,5 @@ func (a *Agent) deliver(contractID, ship string, units int) error {
 		}
 		fmt.Printf("%#v\n", deliver)
 	}
-	return nil
-}
-
-func (a *Agent) sleep(seconds int) error {
-	if seconds == 0 {
-		return nil
-	}
-	fmt.Printf("sleep %d\n", seconds)
-	state, err := json.MarshalIndent(a.State, "", "  ")
-	if err != nil {
-		return err
-	}
-	fmt.Printf("state %s\n", string(state))
-	time.Sleep(time.Duration(seconds) * time.Second)
 	return nil
 }

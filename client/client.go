@@ -494,6 +494,12 @@ func (c Client) ExtractWithSurvey(ship string, survey Survey) (ExtractRes, error
 	}, PayloadJSON: payload}); err != nil {
 		return ExtractRes{}, err
 	}
+	if res.Error.Data.Cooldown.RemainingSeconds != 0 {
+		if err := c.sleep(res.Error.Data.Cooldown.RemainingSeconds); err != nil {
+			return ExtractRes{}, err
+		}
+		return c.ExtractWithSurvey(ship, survey)
+	}
 	return res, nil
 }
 

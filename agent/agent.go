@@ -338,7 +338,7 @@ func (a *Agent) navigateAndExtract(ship string) error {
 	if err != nil {
 		return err
 	}
-	waypoints, err := a.waypoints(orbit.Data.Nav.WaypointSymbol, "type=ASTEROID")
+	waypoints, err := a.waypoints(orbit.Data.Nav.WaypointSymbol, "type=ENGINEERED_ASTEROID")
 	if err != nil {
 		return err
 	}

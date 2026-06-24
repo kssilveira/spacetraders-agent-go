@@ -200,30 +200,16 @@ func (a *Agent) fulfillContracts(headquarters string) error {
 		if err != nil {
 			return err
 		}
-		found := false
-		for _, deliver := range a.State.SymbolToDeliver {
-			if deliver.UnitsFulfilled < deliver.UnitsRequired {
-				found = true
-				break
-			}
-		}
-		if !found {
-			break
-		}
-		isDone, units, err := a.isDone(ship)
+		isFull, err := a.isFull(ship)
 		if err != nil {
 			return err
 		}
-		if !isDone {
+		if !isFull {
 			if err := a.navigateAndExtract(headquarters, ship); err != nil {
 				return err
 			}
-			isDone, units, err = a.isDone(ship)
-			if err != nil {
-				return err
-			}
 		}
-		if err := a.deliver(contractID, ship, units); err != nil {
+		if err := a.deliver(contractID, ship); err != nil {
 			return err
 		}
 	}
@@ -326,11 +312,11 @@ func (a *Agent) extract(ship string) error {
 		if err != nil {
 			return err
 		}
-		isDone, _, err := a.isDone(ship)
+		isFull, err := a.isFull(ship)
 		if err != nil {
 			return err
 		}
-		if isDone {
+		if isFull {
 			return nil
 		}
 		if !isOrbit {
@@ -378,37 +364,23 @@ func (a *Agent) sell(ship string, isOrbit bool) (bool, error) {
 	return isOrbit, nil
 }
 
-func (a *Agent) isDone(ship string) (bool, int, error) {
+func (a *Agent) isFull(ship string) (bool, error) {
 	cargo, err := a.Client.Cargo(ship)
 	if err != nil {
-		return false, 0, err
+		return false, err
 	}
 	a.State.Units = cargo.Units
 	a.State.Capacity = cargo.Capacity
-	if cargo.Units == cargo.Capacity && len(cargo.Inventory) == 1 {
-		have := cargo.Inventory[0].Symbol
-		want := a.State.SymbolToDeliver[have].TradeSymbol
-		if want != have {
-			refine, err := a.Client.Refine(ship, want)
-			if err != nil {
-				return false, 0, err
-			}
-			if refine.Error.Code != 0 {
-				return false, 0, fmt.Errorf("%#v", refine)
-			}
-			return false, 0, nil
-		}
-		return true, cargo.Units, nil
-	}
-	return false, 0, nil
+	return cargo.Units == cargo.Capacity, nil
 }
 
-func (a *Agent) deliver(contractID, ship string, units int) error {
-	for trade, deliver := range a.State.SymbolToDeliver {
+func (a *Agent) deliver(contractID, ship string) error {
+	for trade, cargo := range a.State.SymbolToDeliverToCargo {
 		orbit, err := a.Client.Orbit(ship)
 		if err != nil {
 			return err
 		}
+		deliver := a.State.SymbolToDeliver[trade]
 		if orbit.Data.Nav.WaypointSymbol != deliver.DestinationSymbol {
 			if _, err := a.Client.Navigate(ship, deliver.DestinationSymbol); err != nil {
 				return err
@@ -417,7 +389,7 @@ func (a *Agent) deliver(contractID, ship string, units int) error {
 		if _, err := a.Client.Dock(ship); err != nil {
 			return err
 		}
-		if _, err := a.Client.Deliver(contractID, ship, trade, units); err != nil {
+		if _, err := a.Client.Deliver(contractID, ship, trade, cargo.Units); err != nil {
 			return err
 		}
 	}

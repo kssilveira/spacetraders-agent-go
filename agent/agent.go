@@ -339,7 +339,6 @@ func (a *Agent) extract(ship string) error {
 				return err
 			}
 		}
-		fmt.Printf("len surve %d\n", len(survey.Data.Surveys))
 		if len(survey.Data.Surveys) == 0 {
 			survey, err = a.Client.Survey(ship)
 			if err != nil {

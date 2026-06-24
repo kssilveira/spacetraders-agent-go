@@ -65,3 +65,4 @@ _MINERAL_PROCESSOR_I, MOUNT_MINING_LASER_I
 
 - remember the profit per item and throw away items with negative profit
 
+- handle expired survey

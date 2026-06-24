@@ -326,7 +326,7 @@ func (a *Agent) navigateAndExtract(headquarters, ship string) error {
 		}
 		fmt.Printf("%#v\n", navigate)
 	}
-	if err := a.dock(ship); err != nil {
+	if _, err := a.Client.Dock(ship); err != nil {
 		return err
 	}
 	refuel, err := a.Client.Refuel(ship)
@@ -454,7 +454,7 @@ func (a *Agent) deliver(contractID, ship string, units int) error {
 			}
 			fmt.Printf("%#v\n", navigate)
 		}
-		if err := a.dock(ship); err != nil {
+		if _, err := a.Client.Dock(ship); err != nil {
 			return err
 		}
 		deliver, err := a.Client.Deliver(contractID, ship, trade, units)
@@ -462,24 +462,6 @@ func (a *Agent) deliver(contractID, ship string, units int) error {
 			return err
 		}
 		fmt.Printf("%#v\n", deliver)
-	}
-	return nil
-}
-
-func (a *Agent) dock(ship string) error {
-	dock, err := a.Client.Dock(ship)
-	if err != nil {
-		return err
-	}
-	if dock.Error.Data.SecondsToArrival != 0 {
-		if err := a.sleep(dock.Error.Data.SecondsToArrival); err != nil {
-			return err
-		}
-		dock, err = a.Client.Dock(ship)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("%#v\n", dock)
 	}
 	return nil
 }

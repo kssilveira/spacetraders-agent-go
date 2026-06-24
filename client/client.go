@@ -380,6 +380,12 @@ func (c Client) Dock(ship string) (DockRes, error) {
 	}}); err != nil {
 		return DockRes{}, err
 	}
+	if res.Error.Data.SecondsToArrival != 0 {
+		if err := c.sleep(res.Error.Data.SecondsToArrival); err != nil {
+			return DockRes{}, err
+		}
+		return c.Dock(ship)
+	}
 	return res, nil
 }
 

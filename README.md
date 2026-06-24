@@ -57,6 +57,8 @@ _MINERAL_PROCESSOR_I, MOUNT_MINING_LASER_I
 
 ## TODO
 
+- move error sleep to client
+
 - do survey
 
 ```

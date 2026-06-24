@@ -26,5 +26,6 @@ func all() error {
 		return err
 	}
 	agent := agent.Agent{Client: client.Client{AccountToken: accountToken, AgentToken: agentToken, Client: &http.Client{}}}
+	agent.Client.State = &agent.State
 	return agent.Run(os.Args)
 }

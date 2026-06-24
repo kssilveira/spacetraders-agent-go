@@ -11,10 +11,18 @@ import (
 	"time"
 )
 
+type State struct {
+	Credits         int
+	SymbolToDeliver map[string]Deliver
+	SymbolToCargo   map[string]Inventory
+	Capacity        int
+}
+
 type Client struct {
 	AccountToken string
 	AgentToken   string
 	Client       *http.Client
+	State        *State
 }
 
 type Register struct {
@@ -428,6 +436,12 @@ func (c Client) Survey(ship string) (SurveyRes, error) {
 	}}); err != nil {
 		return SurveyRes{}, err
 	}
+	if res.Error.Data.Cooldown.RemainingSeconds != 0 {
+		if err := c.sleep(res.Error.Data.Cooldown.RemainingSeconds); err != nil {
+			return SurveyRes{}, err
+		}
+		return c.Survey(ship)
+	}
 	return res, nil
 }
 
@@ -634,4 +648,18 @@ func getURL(pathTemplate string, cfg Do) (string, error) {
 		return "", err
 	}
 	return fmt.Sprintf("%s/%s", baseUrl, builder.String()), nil
+}
+
+func (c Client) sleep(seconds int) error {
+	if seconds == 0 {
+		return nil
+	}
+	fmt.Printf("sleep %d\n", seconds)
+	state, err := json.MarshalIndent(c.State, "", "  ")
+	if err != nil {
+		return err
+	}
+	fmt.Printf("state %s\n", string(state))
+	time.Sleep(time.Duration(seconds) * time.Second)
+	return nil
 }

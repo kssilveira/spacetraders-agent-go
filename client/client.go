@@ -648,7 +648,6 @@ func (c Client) do(pathTemplate string, value any, cfg Do) error {
 	}
 	fmt.Printf(" => %d %s\n", resp.StatusCode, url)
 	fmt.Println(prettyJSON.String())
-	fmt.Printf(" => %d %s\n", resp.StatusCode, url)
 	return json.Unmarshal(body, value)
 }
 

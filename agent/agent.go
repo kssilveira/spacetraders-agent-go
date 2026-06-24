@@ -243,6 +243,9 @@ func (a *Agent) fulfillContracts(headquarters string) error {
 				}
 				a.State.SymbolToMarket[item.Symbol] = waypoint.Symbol
 				fmt.Printf("%s %d imports %s\n", waypoint.Symbol, waypoint.Distance, item.Symbol)
+				if err := a.navigateAndSell(ship.Symbol, waypoint.Symbol, item.Symbol); err != nil {
+					return err
+				}
 			}
 			for _, item := range waypoint.Exchange {
 				if _, ok := a.State.SymbolToCargo[item.Symbol]; !ok {
@@ -253,9 +256,11 @@ func (a *Agent) fulfillContracts(headquarters string) error {
 				}
 				a.State.SymbolToMarket[item.Symbol] = waypoint.Symbol
 				fmt.Printf("%s %d exchanges %s\n", waypoint.Symbol, waypoint.Distance, item.Symbol)
+				if err := a.navigateAndSell(ship.Symbol, waypoint.Symbol, item.Symbol); err != nil {
+					return err
+				}
 			}
 		}
-		fmt.Printf("%#v\n", a.State.SymbolToMarket)
 	}
 	return nil
 }
@@ -440,6 +445,31 @@ func (a *Agent) deliver(contractID, ship string) error {
 		if _, err := a.Client.Deliver(contractID, ship, trade, cargo.Units); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (a *Agent) navigateAndSell(ship, waypoint, item string) error {
+	orbit, err := a.Client.Orbit(ship)
+	if err != nil {
+		return err
+	}
+	if orbit.Data.Nav.WaypointSymbol != waypoint {
+		if _, err := a.Client.Navigate(ship, waypoint); err != nil {
+			return err
+		}
+	}
+	if _, err := a.Client.Dock(ship); err != nil {
+		return err
+	}
+	if _, err := a.Client.Refuel(ship); err != nil {
+		return err
+	}
+	if _, err := a.Client.Market(waypoint); err != nil {
+		return err
+	}
+	if _, err = a.sell(ship, true); err != nil {
+		return err
 	}
 	return nil
 }

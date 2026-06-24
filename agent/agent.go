@@ -85,7 +85,7 @@ var (
 func (a *Agent) waypoints(symbol, filter string) ([]client.Waypoint, error) {
 	page := 1
 	res := []client.Waypoint{}
-	hqWaypoint, err := a.Client.Waypoint(symbol)
+	from, err := a.Client.Waypoint(symbol)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (a *Agent) waypoints(symbol, filter string) ([]client.Waypoint, error) {
 		page++
 	}
 	for i, waypoint := range res {
-		waypoint.Distance = int(math.Hypot(float64(hqWaypoint.X-waypoint.X), float64(hqWaypoint.Y-waypoint.Y)))
+		waypoint.Distance = int(math.Hypot(float64(from.X-waypoint.X), float64(from.Y-waypoint.Y)))
 		for _, trait := range waypoint.Traits {
 			if trait.Symbol == "MARKETPLACE" {
 				market, err := a.Client.Market(waypoint.Symbol)
@@ -133,8 +133,13 @@ func (a *Agent) waypoints(symbol, filter string) ([]client.Waypoint, error) {
 	slices.SortFunc(res, func(a, b client.Waypoint) int {
 		return cmp.Compare(a.Distance, b.Distance)
 	})
+	printWaypoints(res)
+	return res, nil
+}
+
+func printWaypoints(waypoints []client.Waypoint) {
 	fmt.Printf("%-*s %-*s %4s %4s %3s traits\n", len("X1-UN88-EE5F"), "symbol", len("ENGINEERED_ASTEROID"), "type", "x", "y", "d")
-	for _, waypoint := range res {
+	for _, waypoint := range waypoints {
 		fmt.Printf("%-*s %-*s %4d %4d %3d %s\n", len("X1-UN88-EE5F"), waypoint.Symbol, len("ENGINEERED_ASTEROID"), waypoint.Type, waypoint.X, waypoint.Y, waypoint.Distance, symbolsFromTraits(waypoint.Traits, interestingTrait))
 		for _, list := range []string{symbolsFromItems("exports", waypoint.Exports), symbolsFromItems("imports", waypoint.Imports), symbolsFromItems("exchange", waypoint.Exchange), typesFromTypes("types", waypoint.Types), symbolsFromShips("ships", waypoint.Ships)} {
 			if list == "" {
@@ -144,7 +149,6 @@ func (a *Agent) waypoints(symbol, filter string) ([]client.Waypoint, error) {
 		}
 	}
 	fmt.Printf("%-*s %-*s %4s %4s %3s traits\n", len("X1-UN88-EE5F"), "symbol", len("ENGINEERED_ASTEROID"), "type", "x", "y", "d")
-	return res, nil
 }
 
 func symbolsFromTraits(items []client.Trait, interesting map[string]any) string {

@@ -253,12 +253,6 @@ func (a *Agent) getHeadquarters() (string, error) {
 	return agent.Data.Headquarters, nil
 }
 
-var (
-	symbolToSource = map[string]string{
-		"IRON": "IRON_ORE",
-	}
-)
-
 func (a *Agent) acceptContract(ship string) (string, error) {
 	contracts, err := a.Client.Contracts()
 	if err != nil {
@@ -275,9 +269,6 @@ func (a *Agent) acceptContract(ship string) (string, error) {
 			found := false
 			for _, deliver := range contract.Terms.Deliver {
 				a.State.SymbolToDeliver[deliver.TradeSymbol] = deliver
-				if source, ok := symbolToSource[deliver.TradeSymbol]; ok {
-					a.State.SymbolToDeliver[source] = deliver
-				}
 				if deliver.UnitsFulfilled < deliver.UnitsRequired {
 					found = true
 				}
@@ -348,6 +339,7 @@ func (a *Agent) extract(ship string) error {
 				return err
 			}
 		}
+		fmt.Printf("len surve %d\n", len(survey.Data.Surveys))
 		if len(survey.Data.Surveys) == 0 {
 			survey, err = a.Client.Survey(ship)
 			if err != nil {

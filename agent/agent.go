@@ -203,10 +203,11 @@ func symbolsFromShips(name string, ships []client.ShipyardShip) string {
 }
 
 func (a *Agent) fulfillContracts(headquarters string) error {
-	ship, err := a.maybeBuyShip(headquarters)
+	ships, err := a.Client.Ships()
 	if err != nil {
 		return err
 	}
+	ship := ships[0].Symbol
 	for {
 		contractID, err := a.acceptContract(ship)
 		if err != nil {
@@ -313,64 +314,6 @@ func (a *Agent) acceptContract(ship string) (string, error) {
 	}
 	fmt.Printf("%#v\n", negotiated)
 	return a.acceptContract(ship)
-}
-
-func (a *Agent) maybeBuyShip(headquarters string) (string, error) {
-	symbol, err := a.excavator()
-	if err != nil {
-		return "", err
-	}
-	if symbol != "" {
-		return symbol, nil
-	}
-	ship, err := a.doBuyShip(headquarters)
-	if err != nil {
-		return "", err
-	}
-	refuel, err := a.Client.Refuel(ship)
-	if err != nil {
-		return "", err
-	}
-	fmt.Printf("%#v\n", refuel)
-	return ship, nil
-}
-
-func (a *Agent) excavator() (string, error) {
-	ships, err := a.Client.Ships()
-	if err != nil {
-		return "", err
-	}
-	for _, ship := range ships {
-		if ship.Registration.Role != "EXCAVATOR" {
-			continue
-		}
-		return ship.Symbol, nil
-	}
-	return "", nil
-}
-
-func (a *Agent) doBuyShip(headquarters string) (string, error) {
-	shipyardWaypoints, err := a.Client.Waypoints(headquarters, "traits=SHIPYARD")
-	if err != nil {
-		return "", err
-	}
-	for _, shipyardWaypoint := range shipyardWaypoints {
-		shipyard, err := a.Client.Shipyard(shipyardWaypoint.Symbol)
-		if err != nil {
-			return "", err
-		}
-		for _, ship := range shipyard.Ships {
-			if ship.Type != "SHIP_MINING_DRONE" {
-				continue
-			}
-			got, err := a.Client.Buy(shipyardWaypoint.Symbol, "SHIP_MINING_DRONE")
-			if err != nil {
-				return "", err
-			}
-			return got.Symbol, nil
-		}
-	}
-	return "", fmt.Errorf("failed to buy ship")
 }
 
 func (a *Agent) navigateAndExtract(headquarters, ship string) error {

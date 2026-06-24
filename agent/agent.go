@@ -26,7 +26,7 @@ func (a *Agent) Run(args []string) error {
 	}
 	switch args[2] {
 	case "contracts":
-		return a.fulfillContracts(headquarters)
+		return a.fulfillContracts()
 	case "waypoints":
 		filter := ""
 		if len(args) > 3 {
@@ -204,7 +204,7 @@ func symbolsFromShips(name string, ships []client.ShipyardShip) string {
 	return fmt.Sprintf("%-*s\n  %s", len("X1-UN88-EE5F"), name, strings.Join(res, "\n  "))
 }
 
-func (a *Agent) fulfillContracts(headquarters string) error {
+func (a *Agent) fulfillContracts() error {
 	ships, err := a.Client.Ships()
 	if err != nil {
 		return err
@@ -220,7 +220,7 @@ func (a *Agent) fulfillContracts(headquarters string) error {
 			return err
 		}
 		if !isFull {
-			if err := a.navigateAndExtract(headquarters, ship); err != nil {
+			if err := a.navigateAndExtract(ship); err != nil {
 				return err
 			}
 		}
@@ -333,16 +333,16 @@ func (a *Agent) acceptContract(ship string) (string, error) {
 	return a.acceptContract(ship)
 }
 
-func (a *Agent) navigateAndExtract(headquarters, ship string) error {
+func (a *Agent) navigateAndExtract(ship string) error {
 	orbit, err := a.Client.Orbit(ship)
 	if err != nil {
 		return err
 	}
-	asteroidWaypoints, err := a.Client.Waypoints(headquarters, "type=ENGINEERED_ASTEROID")
+	waypoints, err := a.waypoints(orbit.Data.Nav.WaypointSymbol, "type=ASTEROID")
 	if err != nil {
 		return err
 	}
-	asteroid := asteroidWaypoints[0].Symbol
+	asteroid := waypoints[0].Symbol
 	if orbit.Data.Nav.WaypointSymbol != asteroid {
 		if _, err := a.Client.Navigate(ship, asteroid); err != nil {
 			return err

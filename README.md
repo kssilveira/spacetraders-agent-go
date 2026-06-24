@@ -2,13 +2,15 @@
 
 https://spacetraders.io agent in Go using https://spacetraders.io/openapi.
 
-## Features
+## Main Features
 
 ### Extract resources to fulfill contracts and sell
 
 ```
 $ go run main.go -- contracts |& tee ~/contracts
 ```
+
+## Other Features
 
 ### List ships
 
@@ -24,7 +26,7 @@ ships
   KAUE5-3, EXCAVATOR, X1-UN88-EE5F, IN_ORBIT, FRAME_DRONE, REACTOR_CHEMICAL_I, ENGINE_IMPULSE_DRIVE_I, MODULE_CARGO_HOLD_I, MODULE_MINERAL_PROCESSOR_I, MOUNT_MINING_LASER_I
 ```
 
-### List waypoints
+### List closest waypoints
 
 ```
 $ go run main.go -- waypoints |& tee ~/waypoints
@@ -57,9 +59,7 @@ _MINERAL_PROCESSOR_I, MOUNT_MINING_LASER_I
   SHIP_SURVEYOR, FRAME_DRONE, REACTOR_CHEMICAL_I, ENGINE_IMPULSE_DRIVE_I, MOUNT_SURVEYOR_I
 ```
 
-### List waypoints with filter
-
-#### Asteroids
+### List closest asteroids
 
 ```
 $ go run main.go -- waypoints type=ASTEROID |& tee ~/asteroids
@@ -72,7 +72,7 @@ X1-UN88-B38  ASTEROID               2  325 300 MINERAL_DEPOSITS
 X1-UN88-B12  ASTEROID            -316   56 314 COMMON_METAL_DEPOSITS
 ```
 
-#### Marketplaces
+#### List closest marketplaces
 
 ```
 $ go run main.go -- waypoints traits=MARKETPLACE |& tee ~/marketplaces
@@ -94,7 +94,7 @@ imports      LAB_INSTRUMENTS, EQUIPMENT
 exchange     FUEL
 ```
 
-#### Shipyards
+### List closest shipyards
 
 ```
 $ go run main.go -- waypoints traits=SHIPYARD |& tee ~/shipyards

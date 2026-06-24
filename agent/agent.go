@@ -223,6 +223,39 @@ func (a *Agent) fulfillContracts(headquarters string) error {
 		if err := a.deliver(contractID, ship); err != nil {
 			return err
 		}
+		a.State.SymbolToMarket = map[string]string{}
+		ships, err := a.Client.Ships()
+		if err != nil {
+			return err
+		}
+		ship := ships[0]
+		waypoints, err := a.waypoints(ship.Nav.WaypointSymbol, "traits=MARKETPLACE")
+		if err != nil {
+			return err
+		}
+		for _, waypoint := range waypoints {
+			for _, item := range waypoint.Imports {
+				if _, ok := a.State.SymbolToCargo[item.Symbol]; !ok {
+					continue
+				}
+				if _, ok := a.State.SymbolToMarket[item.Symbol]; ok {
+					continue
+				}
+				a.State.SymbolToMarket[item.Symbol] = waypoint.Symbol
+				fmt.Printf("%s %d imports %s\n", waypoint.Symbol, waypoint.Distance, item.Symbol)
+			}
+			for _, item := range waypoint.Exchange {
+				if _, ok := a.State.SymbolToCargo[item.Symbol]; !ok {
+					continue
+				}
+				if _, ok := a.State.SymbolToMarket[item.Symbol]; ok {
+					continue
+				}
+				a.State.SymbolToMarket[item.Symbol] = waypoint.Symbol
+				fmt.Printf("%s %d exchanges %s\n", waypoint.Symbol, waypoint.Distance, item.Symbol)
+			}
+		}
+		fmt.Printf("%#v\n", a.State.SymbolToMarket)
 	}
 	return nil
 }
@@ -354,12 +387,8 @@ func (a *Agent) sell(ship string, isOrbit bool) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	a.State.SymbolToCargo = map[string]client.Inventory{}
-	a.State.SymbolToDeliverToCargo = map[string]client.Inventory{}
 	for _, item := range cargo.Inventory {
-		a.State.SymbolToCargo[item.Symbol] = item
 		if _, ok := a.State.SymbolToDeliver[item.Symbol]; ok {
-			a.State.SymbolToDeliverToCargo[item.Symbol] = item
 			continue
 		}
 		if isOrbit {
@@ -382,6 +411,14 @@ func (a *Agent) isFull(ship string) (bool, error) {
 	}
 	a.State.Units = cargo.Units
 	a.State.Capacity = cargo.Capacity
+	a.State.SymbolToCargo = map[string]client.Inventory{}
+	a.State.SymbolToDeliverToCargo = map[string]client.Inventory{}
+	for _, item := range cargo.Inventory {
+		a.State.SymbolToCargo[item.Symbol] = item
+		if _, ok := a.State.SymbolToDeliver[item.Symbol]; ok {
+			a.State.SymbolToDeliverToCargo[item.Symbol] = item
+		}
+	}
 	return cargo.Units == cargo.Capacity, nil
 }
 

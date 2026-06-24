@@ -116,8 +116,6 @@ types        SHIP_PROBE, SHIP_SIPHON_DRONE
 
 ## TODO
 
-- find the closest market that buys each of the extracted items
-
 - go to the markets to sell
 
 - calculate profit given the fuel cost

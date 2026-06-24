@@ -18,6 +18,7 @@ type State struct {
 	SymbolToCargo          map[string]Inventory
 	Units                  int
 	Capacity               int
+	SymbolToMarket         map[string]string
 }
 
 type Client struct {

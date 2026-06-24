@@ -116,10 +116,4 @@ types        SHIP_PROBE, SHIP_SIPHON_DRONE
 
 ## TODO
 
-- go to the markets to sell
-
-- calculate profit given the fuel cost
-
-- remember the profit per item and throw away items with negative profit
-
 - handle expired survey

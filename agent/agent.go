@@ -402,8 +402,12 @@ func (a *Agent) sell(ship string, isOrbit bool) (bool, error) {
 				return false, err
 			}
 		}
-		if _, err := a.Client.Sell(ship, item.Symbol, item.Units); err != nil {
+		sell, err := a.Client.Sell(ship, item.Symbol, item.Units)
+		if err != nil {
 			return false, err
+		}
+		if sell.Data.Agent.Credits != 0 {
+			a.State.Profit = sell.Data.Agent.Credits - a.State.Credits
 		}
 	}
 	return isOrbit, nil

@@ -13,6 +13,7 @@ import (
 
 type State struct {
 	Credits                int
+	Profit                 int
 	SymbolToDeliver        map[string]Deliver
 	SymbolToDeliverToCargo map[string]Inventory
 	SymbolToCargo          map[string]Inventory
@@ -546,7 +547,12 @@ func (c Client) Navigate(ship, symbol string) (NavigateRes, error) {
 	return res, nil
 }
 
+type Sell struct {
+	Agent Agent `json:"agent"`
+}
+
 type SellRes struct {
+	Data Sell `json:"data"`
 }
 
 func (c Client) Sell(ship, symbol string, units int) (SellRes, error) {

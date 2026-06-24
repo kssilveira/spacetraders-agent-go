@@ -113,7 +113,3 @@ ships
 X1-UN88-C41  ORBITAL_STATION      -31 -150 177 MARKETPLACE, SHIPYARD
 types        SHIP_PROBE, SHIP_SIPHON_DRONE
 ```
-
-## TODO
-
-- handle expired survey

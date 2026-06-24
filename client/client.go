@@ -471,6 +471,7 @@ type ExtractErrorData struct {
 
 type ExtractError struct {
 	Data ExtractErrorData `json:"data"`
+	Code int              `json:"code"`
 }
 
 type ExtractRes struct {

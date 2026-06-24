@@ -391,8 +391,12 @@ func (a *Agent) extract(ship string) error {
 				return err
 			}
 		}
-		if _, err := a.Client.ExtractWithSurvey(ship, survey.Data.Surveys[0]); err != nil {
+		extract, err := a.Client.ExtractWithSurvey(ship, survey.Data.Surveys[0])
+		if err != nil {
 			return err
+		}
+		if extract.Error.Code != 0 {
+			survey.Data.Surveys = nil
 		}
 	}
 	return nil

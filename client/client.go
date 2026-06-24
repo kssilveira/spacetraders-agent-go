@@ -12,10 +12,12 @@ import (
 )
 
 type State struct {
-	Credits         int
-	SymbolToDeliver map[string]Deliver
-	SymbolToCargo   map[string]Inventory
-	Capacity        int
+	Credits                int
+	SymbolToDeliver        map[string]Deliver
+	SymbolToDeliverToCargo map[string]Inventory
+	SymbolToCargo          map[string]Inventory
+	Units                  int
+	Capacity               int
 }
 
 type Client struct {

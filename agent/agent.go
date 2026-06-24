@@ -357,10 +357,12 @@ func (a *Agent) sell(ship string, isOrbit bool) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	a.State.SymbolToCargo = map[string]client.Inventory{}
+	a.State.SymbolToDeliverToCargo = map[string]client.Inventory{}
 	for _, item := range cargo.Inventory {
-		a.State.SymbolToCargo = map[string]client.Inventory{}
+		a.State.SymbolToCargo[item.Symbol] = item
 		if _, ok := a.State.SymbolToDeliver[item.Symbol]; ok {
-			a.State.SymbolToCargo[item.Symbol] = item
+			a.State.SymbolToDeliverToCargo[item.Symbol] = item
 			continue
 		}
 		if isOrbit {
@@ -381,6 +383,7 @@ func (a *Agent) isDone(ship string) (bool, int, error) {
 	if err != nil {
 		return false, 0, err
 	}
+	a.State.Units = cargo.Units
 	a.State.Capacity = cargo.Capacity
 	if cargo.Units == cargo.Capacity && len(cargo.Inventory) == 1 {
 		have := cargo.Inventory[0].Symbol

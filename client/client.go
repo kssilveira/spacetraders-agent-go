@@ -358,6 +358,12 @@ func (c Client) Orbit(ship string) (OrbitRes, error) {
 	}}); err != nil {
 		return OrbitRes{}, err
 	}
+	if res.Error.Data.SecondsToArrival != 0 {
+		if err := c.sleep(res.Error.Data.SecondsToArrival); err != nil {
+			return OrbitRes{}, err
+		}
+		return c.Orbit(ship)
+	}
 	return res, nil
 }
 

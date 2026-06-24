@@ -310,7 +310,7 @@ func (a *Agent) acceptContract(ship string) (string, error) {
 }
 
 func (a *Agent) navigateAndExtract(headquarters, ship string) error {
-	orbit, err := a.orbit(ship)
+	orbit, err := a.Client.Orbit(ship)
 	if err != nil {
 		return err
 	}
@@ -464,23 +464,6 @@ func (a *Agent) deliver(contractID, ship string, units int) error {
 		fmt.Printf("%#v\n", deliver)
 	}
 	return nil
-}
-
-func (a *Agent) orbit(ship string) (client.OrbitRes, error) {
-	orbit, err := a.Client.Orbit(ship)
-	if err != nil {
-		return client.OrbitRes{}, err
-	}
-	if orbit.Error.Data.SecondsToArrival != 0 {
-		if err := a.sleep(orbit.Error.Data.SecondsToArrival); err != nil {
-			return client.OrbitRes{}, err
-		}
-		orbit, err = a.Client.Orbit(ship)
-		if err != nil {
-			return client.OrbitRes{}, err
-		}
-	}
-	return orbit, nil
 }
 
 func (a *Agent) sleep(seconds int) error {

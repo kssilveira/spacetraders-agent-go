@@ -329,6 +329,7 @@ func (a *Agent) navigateAndExtract(headquarters, ship string) error {
 func (a *Agent) extract(ship string) error {
 	isOrbit := false
 	var err error
+	var survey client.SurveyRes
 	for {
 		isOrbit, err = a.sell(ship, isOrbit)
 		if err != nil {
@@ -347,9 +348,11 @@ func (a *Agent) extract(ship string) error {
 				return err
 			}
 		}
-		survey, err := a.Client.Survey(ship)
-		if err != nil {
-			return err
+		if len(survey.Data.Surveys) == 0 {
+			survey, err = a.Client.Survey(ship)
+			if err != nil {
+				return err
+			}
 		}
 		if _, err := a.Client.ExtractWithSurvey(ship, survey.Data.Surveys[0]); err != nil {
 			return err

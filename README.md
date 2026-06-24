@@ -57,36 +57,6 @@ _MINERAL_PROCESSOR_I, MOUNT_MINING_LASER_I
 
 ## TODO
 
-- remove prints
-
-- do survey
-
-```
-curl https://api.spacetraders.io/v2/my/ships/KAUE5-1/survey \
-  --request POST
-```
-
-- use survey
-
-```
-curl https://api.spacetraders.io/v2/my/ships/KAUE5-1/extract/survey \
-  --request POST \
-  --header 'Content-Type: application/json' \
-  --data '{
-  "signature": "X1-UN88-EE5F-3EC0C9",
-  "symbol": "X1-UN88-EE5F",
-  "deposits": [
-    {
-      "symbol": "IRON_ORE"
-    }
-  ],
-  "expiration": "2026-06-23T18:07:58.422Z",
-  "size": "LARGE"
-}'
-```
-
-- go to the closest ASTEROID or ENGINEERED_ASTEROID that is not STRIPPED
-
 - find the closest market that buys each of the extracted items
 
 - go to the markets to sell

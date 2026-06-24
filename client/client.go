@@ -388,7 +388,37 @@ func (c Client) Refuel(ship string) (RefuelRes, error) {
 	return res, nil
 }
 
+type Deposit struct {
+	Symbol string `json:"symbol"`
+}
+
+type Survey struct {
+	Signature  string    `json:"signature"`
+	Symbol     string    `json:"symbol"`
+	Deposits   []Deposit `json:"deposits"`
+	Expiration string    `json:"expiration"`
+	Size       string    `json:"size"`
+}
+
+type SurveyData struct {
+	Surveys []Survey `json:"surveys"`
+}
+
+type SurveyCooldown struct {
+	RemainingSeconds int `json:"remainingSeconds"`
+}
+
+type SurveyErrorData struct {
+	Cooldown SurveyCooldown `json:"cooldown"`
+}
+
+type SurveyError struct {
+	Data SurveyErrorData `json:"data"`
+}
+
 type SurveyRes struct {
+	Data  SurveyData  `json:"data"`
+	Error SurveyError `json:"error"`
 }
 
 func (c Client) Survey(ship string) (SurveyRes, error) {
@@ -422,6 +452,20 @@ func (c Client) Extract(ship string) (ExtractRes, error) {
 	if err := c.do("my/ships/{{.ship}}/extract", &res, Do{Method: "POST", Template: map[string]string{
 		"ship": ship,
 	}}); err != nil {
+		return ExtractRes{}, err
+	}
+	return res, nil
+}
+
+func (c Client) ExtractWithSurvey(ship string, survey Survey) (ExtractRes, error) {
+	var res ExtractRes
+	payload, err := json.Marshal(survey)
+	if err != nil {
+		return ExtractRes{}, err
+	}
+	if err := c.do("my/ships/{{.ship}}/extract/survey", &res, Do{Method: "POST", Template: map[string]string{
+		"ship": ship,
+	}, PayloadJSON: payload}); err != nil {
 		return ExtractRes{}, err
 	}
 	return res, nil
@@ -520,10 +564,11 @@ func (c Client) Refine(ship, produce string) (RefineRes, error) {
 }
 
 type Do struct {
-	IsAccount bool
-	Method    string
-	Template  map[string]string
-	Payload   map[string]any
+	IsAccount   bool
+	Method      string
+	Template    map[string]string
+	Payload     map[string]any
+	PayloadJSON []byte
 }
 
 func (c Client) do(pathTemplate string, value any, cfg Do) error {
@@ -537,6 +582,9 @@ func (c Client) do(pathTemplate string, value any, cfg Do) error {
 	payload, err := json.Marshal(cfg.Payload)
 	if err != nil {
 		return err
+	}
+	if cfg.PayloadJSON != nil {
+		payload = cfg.PayloadJSON
 	}
 	if cfg.Method == "" {
 		cfg.Method = "GET"

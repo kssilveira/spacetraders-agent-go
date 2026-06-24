@@ -375,12 +375,12 @@ func (a *Agent) extract(ship string) error {
 			}
 			fmt.Printf("%#v\n", orbit)
 		}
-		survey, err := a.Client.Survey(ship)
+		survey, err := a.survey(ship)
 		if err != nil {
 			return err
 		}
 		fmt.Printf("%#v\n", survey)
-		extract, err := a.Client.Extract(ship)
+		extract, err := a.Client.ExtractWithSurvey(ship, survey.Data.Surveys[0])
 		if err != nil {
 			return err
 		}
@@ -506,6 +506,23 @@ func (a *Agent) orbit(ship string) (client.OrbitRes, error) {
 		}
 	}
 	return orbit, nil
+}
+
+func (a *Agent) survey(ship string) (client.SurveyRes, error) {
+	survey, err := a.Client.Survey(ship)
+	if err != nil {
+		return client.SurveyRes{}, err
+	}
+	if survey.Error.Data.Cooldown.RemainingSeconds != 0 {
+		if err := a.sleep(survey.Error.Data.Cooldown.RemainingSeconds); err != nil {
+			return client.SurveyRes{}, err
+		}
+		survey, err = a.Client.Survey(ship)
+		if err != nil {
+			return client.SurveyRes{}, err
+		}
+	}
+	return survey, nil
 }
 
 func (a *Agent) sleep(seconds int) error {

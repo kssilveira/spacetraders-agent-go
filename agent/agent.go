@@ -354,7 +354,7 @@ func (a *Agent) navigateAndExtract(ship string) error {
 	if _, err := a.Client.Refuel(ship); err != nil {
 		return err
 	}
-	if _, err := a.Client.Market(orbit.Data.Nav.WaypointSymbol); err != nil {
+	if _, err := a.Client.Market(asteroid); err != nil {
 		return err
 	}
 	if err := a.extract(ship); err != nil {

@@ -29,6 +29,8 @@ ships
 ```
 $ go run main.go -- waypoints |& tee ~/waypoints
 
+symbol       type                   x    y   d traits
+
 X1-UN88-EE5F ENGINEERED_ASTEROID  -24    4  29 COMMON_METAL_DEPOSITS, STRIPPED, MARKETPLACE
 exchange     FUEL
 
@@ -53,6 +55,63 @@ ships
   SHIP_MINING_DRONE, FRAME_DRONE, REACTOR_CHEMICAL_I, ENGINE_IMPULSE_DRIVE_I, MODULE_CARGO_HOLD_I, MODULE
 _MINERAL_PROCESSOR_I, MOUNT_MINING_LASER_I
   SHIP_SURVEYOR, FRAME_DRONE, REACTOR_CHEMICAL_I, ENGINE_IMPULSE_DRIVE_I, MOUNT_SURVEYOR_I
+```
+
+### List waypoints with filter
+
+#### Asteroids
+
+```
+$ go run main.go -- waypoints type=ASTEROID |& tee ~/asteroids
+
+symbol       type                   x    y   d traits
+X1-UN88-B10  ASTEROID              31  308 285 MINERAL_DEPOSITS
+X1-UN88-B9   ASTEROID            -191  252 294 COMMON_METAL_DEPOSITS
+X1-UN88-B35  ASTEROID             154  277 296 COMMON_METAL_DEPOSITS
+X1-UN88-B38  ASTEROID               2  325 300 MINERAL_DEPOSITS
+X1-UN88-B12  ASTEROID            -316   56 314 COMMON_METAL_DEPOSITS
+```
+
+#### Marketplaces
+
+```
+$ go run main.go -- waypoints traits=MARKETPLACE |& tee ~/marketplaces
+
+symbol       type                   x    y   d traits
+
+X1-UN88-A2   MOON                  -3   25   0 MARKETPLACE, SHIPYARD
+imports      SHIP_PLATING, SHIP_PARTS
+exchange     FUEL
+types        SHIP_PROBE, SHIP_LIGHT_SHUTTLE, SHIP_LIGHT_HAULER
+
+X1-UN88-A1   PLANET                -3   25   0 MARKETPLACE
+imports      FOOD, MEDICINE, CLOTHING, EQUIPMENT, JEWELRY, HOLOGRAPHICS
+exchange     FUEL
+
+X1-UN88-A4   ORBITAL_STATION       -3   25   0 MARKETPLACE
+exports      NOVEL_LIFEFORMS
+imports      LAB_INSTRUMENTS, EQUIPMENT
+exchange     FUEL
+```
+
+#### Shipyards
+
+```
+$ go run main.go -- waypoints traits=SHIPYARD |& tee ~/shipyards
+
+symbol       type                   x    y   d traits
+
+X1-UN88-A2   MOON                  -3   25   0 MARKETPLACE, SHIPYARD
+types        SHIP_PROBE, SHIP_LIGHT_SHUTTLE, SHIP_LIGHT_HAULER
+
+X1-UN88-H52  MOON                 -44   11  43 MARKETPLACE, SHIPYARD
+types        SHIP_MINING_DRONE, SHIP_SURVEYOR
+ships
+  SHIP_MINING_DRONE, FRAME_DRONE, REACTOR_CHEMICAL_I, ENGINE_IMPULSE_DRIVE_I, MODULE_CARGO_HOLD_I, MODULE_MINERAL_PROCESSOR_I, MOUNT_MINING_LASER_I
+  SHIP_SURVEYOR, FRAME_DRONE, REACTOR_CHEMICAL_I, ENGINE_IMPULSE_DRIVE_I, MOUNT_SURVEYOR_I
+
+X1-UN88-C41  ORBITAL_STATION      -31 -150 177 MARKETPLACE, SHIPYARD
+types        SHIP_PROBE, SHIP_SIPHON_DRONE
 ```
 
 ## TODO

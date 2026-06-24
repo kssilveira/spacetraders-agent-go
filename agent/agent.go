@@ -28,7 +28,11 @@ func (a *Agent) Run(args []string) error {
 	case "contracts":
 		return a.fulfillContracts(headquarters)
 	case "waypoints":
-		if _, err := a.waypoints(headquarters); err != nil {
+		filter := ""
+		if len(args) > 3 {
+			filter = args[3]
+		}
+		if _, err := a.waypoints(headquarters, filter); err != nil {
 			return err
 		}
 	case "ships":
@@ -78,15 +82,22 @@ var (
 	}
 )
 
-func (a *Agent) waypoints(headquarters string) ([]client.Waypoint, error) {
+func (a *Agent) waypoints(symbol, filter string) ([]client.Waypoint, error) {
 	page := 1
 	res := []client.Waypoint{}
-	hqWaypoint, err := a.Client.Waypoint(headquarters)
+	hqWaypoint, err := a.Client.Waypoint(symbol)
 	if err != nil {
 		return nil, err
 	}
 	for {
-		waypoints, err := a.Client.Waypoints(headquarters, fmt.Sprintf("page=%d&limit=20", page))
+		query := []string{
+			fmt.Sprintf("page=%d", page),
+			"limit=20",
+		}
+		if filter != "" {
+			query = append(query, filter)
+		}
+		waypoints, err := a.Client.Waypoints(symbol, strings.Join(query, "&"))
 		if err != nil {
 			return nil, err
 		}
